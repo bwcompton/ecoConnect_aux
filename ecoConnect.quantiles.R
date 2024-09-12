@@ -17,7 +17,7 @@
   
 
    
-*** rewrite to sample nested pseudo-parcels by region, state, and HUC8 watershed ...
+*** rewrite to sample nested pseudo-parcels by region, state, and HUC8 watershed ...  xxx yyy
    
    
   
