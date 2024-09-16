@@ -41,7 +41,9 @@
    sh <- s * 1e3   + h
    cat('Setting excluded cells to missing...\n')
    sh[land %in% exclude] <- NA                  # set all excluded cells to nodata (even though some may have values for ecoConnect--we exclude these from percentiles)
-   cat('Saving shindex...\n')
+   names(sh) <- NULL                                                                            # remove names
+   
+      cat('Saving shindex...\n')
    writeRaster(sh, paste0(resultpath, 'shindex.tif'), overwrite = TRUE, datatype = type, NAflag = typeinfo$noDataValue)
    
    
