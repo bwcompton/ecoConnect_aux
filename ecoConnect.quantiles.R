@@ -40,7 +40,7 @@
    
    
    n <<- n;acres<<-acres;best.pct <<- best.pct; layers <<- layers;server.names <<- server.names; sourcepath <<- sourcepath; threshold <<- threshold
-   return()
+ #  return()
    
    
    library(terra)
@@ -105,7 +105,7 @@
                   y <- lay.vals[[k]][block.indices[[j]], block.indices[[j]]]              #             pull out subblock
                   y[is.na(sh[block.indices[[j]], block.indices[[j]]])] <- NA              #             mask from shindex
                   z[i, j, k, 1] <- mean(y, na.rm = TRUE)                                  #             sample all values
-                  z[i, j, k, 2] <- mean(y[y >= quantile(y, best.pct)], na.rm = TRUE)      #             sample top best.pct
+                  z[i, j, k, 2] <- mean(y[y >= quantile(y, best.pct, na.rm = TRUE)], na.rm = TRUE)      #             sample top best.pct
                }
             }
          }
