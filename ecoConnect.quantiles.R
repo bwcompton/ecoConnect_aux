@@ -21,9 +21,15 @@
    #   shindex.tif         index grid for states and HUC8s, with nodata for all cells that should be masked out (marine, estaurine, freshwater tidal)
    # 
    # Result (written to sourcepath):
-   #   ecoConnect_quantiles<best.pct>.RDS, data frame of percentiles
-   #     RDS with 4 x 260 x 6 x 2 x 100 array of system x region (full = 1, state = 14, huc = 245) x size x mean vs best x percentile (100)
-   #     
+   #   ecoConnect_quantiles.RDS
+   #     RDS with three arrays
+   #        quantiles.full, quantiles.state, quantiles.huc
+   #     each with 5 dimensions
+   #        1. region (full = 1, state = 14, huc = 245)
+   #        2. acres (5 or 6)
+   #        3. systems (4)
+   #        4. all/best (2)
+   #        5. percentiles (100)
    #   sample_sizes_full.txt
    #   sample_sizes_state.txt
    #   sample_sizes_huc.txt
@@ -122,6 +128,26 @@
       }
    }
    
+   
+   # z is row x acres x systems x all/best
+   # results are region x acres x systems x all/best x percentiles
+   
+   quantiles.full <- array(NA, dim <- c(1, length(acres), length(systems), 2, 100))       # result for full landscape (1 region)
+   quantiles.state <- array(NA, dim <- c(14, length(acres), length(systems), 2, 100))     # result for states (14 states)
+   quantiles.huc <- array(NA, dim <- c(245, length(acres), length(systems), 2, 100))      # result for HUC8s (245 HUCs)
+   
+   # Now take percentiles (and sample size)
+   for(i in 1:3) {                                                                        # For each set of regions,
+      for(r in 1: um...........) {
+         for(j in 1:length(acres)) {                                                      #    For each block size,
+            for(k in 1:length(layers)) {                                                  #       For each layer,
+               for(l in 1:2) {                                                            #          For all/best,   
+                  
+               } 
+            }  
+         }
+      }
+   }
    
    
    # Now take percentiles and get sample size
