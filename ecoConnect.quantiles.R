@@ -39,7 +39,7 @@
    # B. Compton, 12 Sep 2024 (from ecoConnect.big.quantiles)
    
    
-   n <<- n;acres<<-acres;best.pct <<- best.pct; layers <<- layers;server.names <<- server.names; sourcepath <<- sourcepath; threshold <<- threshold
+ #  n <<- n;acres<<-acres;best.pct <<- best.pct; layers <<- layers;server.names <<- server.names; sourcepath <<- sourcepath; threshold <<- threshold
  #  return()
    
    
