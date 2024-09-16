@@ -85,16 +85,21 @@
    
    # gather samples
    for(i in 1:n) {                                                                        # For each sample,
+      cat('Trying ', i, '...\n')
       failure <- TRUE
       got.data <- FALSE
       while(failure) {                                                                    #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                         #    index of sample
          x <- unlist(shindex[s[1] + block.idx, s[2] + block.idx], use.names = FALSE)      #    read shindex for block
-         if(any(!is.na(x))) {                                                             #    If there are any data, continue
+         cat(c('   got data', '   no data')[any(!is.na(x)) + 1], '\n')
+                 if(any(!is.na(x))) {                                                             #    If there are any data, continue
             sh <- matrix(x, length(block.idx), length(block.idx), byrow = TRUE)           #       make a proper matrix of it
             for(j in 1:length(acres)) {                                                   #       for each block size,
                if(sum(is.na(sh[block.indices[[j]], block.indices[[j]]])) > thresholds[j]) #       bail if too many missing cells   
+               {
+                  cat('   Too many missing\n')
                   next
+               }
                if(!got.data) {                                                            #             if we don't have data yet,
                   lay.vals <- lapply(lays, read.layers)                                   #                read current block of all 4 ecoConnect layers as matrices
                   got.data <- TRUE
