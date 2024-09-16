@@ -5,7 +5,7 @@
                                  cleanup = TRUE) {
     
     
-    # Rescale regional connectivity to 0-100, round, and convert to integer for posting. Nodata cells where mask is not nodata are set to zero.
+    # Rescale regional connectivity to 0-100, round, and convert to integer for posting. Nodata cells where mask isn't nodata are set to zero.
     # Builds overviews and stats
     # Arguments:
     #   source              source system name

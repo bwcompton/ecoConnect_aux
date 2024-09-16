@@ -53,7 +53,7 @@
       c(floor(x / 1000), x - floor(x / 1000) * 1000)
    
    'read.layers' <- function(x)                                                           # read raster layer x
-      matrix(unlist(x[s[1] + block.idx, s[2] + block.idx]), max.block, max.block, byrow = TRUE)
+      matrix(unlist(x[s[1] + block.idx, s[2] + block.idx], use.names = FALSE), max.block, max.block, byrow = TRUE)
    
    
    # come up with indices for each specified acerage 
@@ -89,8 +89,7 @@
       got.data <- FALSE
       while(failure) {                                                                    #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                         #    index of sample
-         x <- unlist(shindex[s[1] + block.idx, s[2] + block.idx])                         #    read shindex for block
- #        names(x) <- NULL        # ***************** remove names in prep fn, not here ***************
+         x <- unlist(shindex[s[1] + block.idx, s[2] + block.idx], use.names = FALSE)      #    read shindex for block
          if(any(!is.na(x))) {                                                             #    If there are any data, continue
             sh <- matrix(x, length(block.idx), length(block.idx), byrow = TRUE)           #       make a proper matrix of it
             for(j in 1:length(acres)) {                                                   #       for each block size,
@@ -128,5 +127,5 @@
    
   # saveRDS(z, f <- paste0(sourcepath, 'quantiles_', ..., '.RDS'))
    cat('Results written to ', f, '\n', sep = '')
-   cat('Total time taken: ', seconds_to_period(round(as.duration(interval(ts, Sys.time())))), '\n', sep = '')
+   cat('Total time taken: ', format(seconds_to_period(round(as.duration(interval(ts, Sys.time()))))), '\n', sep = '')
 }
