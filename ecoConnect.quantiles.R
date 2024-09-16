@@ -39,8 +39,8 @@
    # B. Compton, 12 Sep 2024 (from ecoConnect.big.quantiles)
    
    
- #  n <<- n;acres<<-acres;best.pct <<- best.pct; layers <<- layers;server.names <<- server.names; sourcepath <<- sourcepath; threshold <<- threshold
- #  return()
+   #  n <<- n;acres<<-acres;best.pct <<- best.pct; layers <<- layers;server.names <<- server.names; sourcepath <<- sourcepath; threshold <<- threshold
+   #  return()
    
    
    library(terra)
@@ -108,12 +108,12 @@
                   z[i, j, k, 2] <- mean(y[y >= quantile(y, best.pct, na.rm = TRUE)], na.rm = TRUE)      #             sample top best.pct
                }
             }
+            statehuc[i, ] <- unpack(sh[floor(max.block / 2), floor(max.block / 2)])       #    get state and HUC ids
          }
-         statehuc[i, ] <- unpack(sh[floor(max.block / 2), floor(max.block / 2)])          #    get state and HUC ids
       }
    }
    
-
+   
    
    # Now take percentiles and get sample size
    # write result RDS
@@ -123,9 +123,9 @@
    
    
    
-
    
-  # saveRDS(z, f <- paste0(sourcepath, 'quantiles_', ..., '.RDS'))
+   
+   # saveRDS(z, f <- paste0(sourcepath, 'quantiles_', ..., '.RDS'))
    cat('Results written to ', f, '\n', sep = '')
    cat('Total time taken: ', format(seconds_to_period(round(as.duration(interval(ts, Sys.time()))))), '\n', sep = '')
 }
