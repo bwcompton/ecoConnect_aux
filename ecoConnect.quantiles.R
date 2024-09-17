@@ -106,7 +106,7 @@
       success <- FALSE
       while(!success) {                                                                   #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                         #    index of sample
-         cat('s = ', s[1], ', ', s[2], '\n', sep = '')
+         cat('s = ', s[1], ', ', s[2], '\n', sep = '') 
          sh <- index.rast(shindex, s, block.idx)                                          #    read shindex for block
 #         cat(c('   no data', '   got data')[any(!is.na(x)) + 1], '\n')
          if(any(!is.na(sh))) {                                                            #    If there are any data, continue
