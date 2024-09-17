@@ -21,6 +21,7 @@
    #     shindex     integer geoTIFF of states (11000) and HUC8 watersheds (00111)
    #     stateinfo   table of state classes and state names
    #     hucinfo     table of HUC8 classes and 8 digit HUC8 code
+   # Note: states and HUCs must be numbered 1:n
    # B. Compton, 6 Sep 2024
    
    
@@ -42,7 +43,8 @@
    cat('Setting excluded cells to missing...\n')
    sh[land %in% exclude] <- NA                  # set all excluded cells to nodata (even though some may have values for ecoConnect--we exclude these from percentiles)
    cat('Saving shindex...\n')
-   writeRaster(sh, paste0(resultpath, 'shindex.tif'), overwrite = TRUE, datatype = type, NAflag = typeinfo$noDataValue)
+   writeRaster(sh, paste0(resultpath, 'shindex.tif'), overwrite = TRUE, datatype = type, 
+               NAflag = typeinfo$noDataValue)
    
    
    cat('Building tables...\n')
