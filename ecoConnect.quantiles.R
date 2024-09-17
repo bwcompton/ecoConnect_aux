@@ -48,22 +48,29 @@
    # B. Compton, 12 Sep 2024 (from ecoConnect.big.quantiles)
    
    
- #  n <<- n;acres<<-acres;best.pct <<- best.pct; layers <<- layers;server.names <<- server.names; sourcepath <<- sourcepath; threshold <<- threshold
- #  return()
+  #   n <<- n;acres<<-acres;best.pct <<- best.pct; layers <<- layers;server.names <<- server.names; sourcepath <<- sourcepath; threshold <<- threshold
+  #   return()
    
    
    library(terra)
    library(lubridate)
    
    
-   ts <- Sys.time()
-   
+   'index.rast' <- function(x, s, indices) {                                              # index block of a raster object without blowing up on lower edges
+      i <- list(s[1] + indices, s[2] + indices)                                           # row and column indices, taking 1st col/row beyond lower edge
+      z <- matrix(unlist(x[pmax(i[[1]], 1), pmax(i[[2]], 1)], use.names = FALSE), 
+                  length(indices), length(indices), byrow = TRUE)                         # read block and convert to matrix
+      z[i[[1]] < 1, ] <- NA                                                               # nuke rows off north edge, and columns off west edge
+      z[, i[[2]] < 1] <- NA
+      z
+   }
+  
    'unpack' <- function(x)                                                                # unpack state and HUC ids
       c(floor(x / 1000), x - floor(x / 1000) * 1000)
    
-   'read.layers' <- function(x)                                                           # read raster layer x
-      matrix(unlist(x[s[1] + block.idx, s[2] + block.idx], use.names = FALSE), max.block, max.block, byrow = TRUE)
    
+   
+   ts <- Sys.time()
    
    # come up with indices for each specified acerage 
    cells.per.acre <- 4.496507136                                                          # 1 acre = 4.5 cells
@@ -95,28 +102,26 @@
    
    # gather samples
    for(i in 1:n) {                                                                        # For each sample,
-      cat('Trying ', i, '...\n')
+      cat('Trying ', i, '...\n', sep = '')
       success <- FALSE
       while(!success) {                                                                   #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                         #    index of sample
-         cat('s = ', s[1], ', ', s[2], '\n', sep = '')
-         x <- unlist(shindex[s[1] + block.idx, s[2] + block.idx], use.names = FALSE)      #    read shindex for block
-         cat(c('   no data', '   got data')[any(!is.na(x)) + 1], '\n')
-         if(any(!is.na(x))) {                                                             #    If there are any data, continue
-            sh <- matrix(x, length(block.idx), length(block.idx), byrow = TRUE)           #       make a proper matrix of it
-            
+         cat('s = ', s[1], ', ', s[2], '\n', sep = '', sep = '')
+         sh <- index.rast(shindex, s, block.idx)                                          #    read shindex for block
+#         cat(c('   no data', '   got data')[any(!is.na(x)) + 1], '\n')
+         if(any(!is.na(sh))) {                                                            #    If there are any data, continue
             got.layers <- FALSE
             for(j in 1:length(acres)) {                                                   #       for each block size,
-               cat('   ', acres[j], ' acres\n')
+#               cat('   ', acres[j], ' acres\n')
                if(sum(is.na(sh[block.indices[[j]], block.indices[[j]]])) > thresholds[j]) #       bail if too many missing cells   
                {
-                  cat('      Too many missing   ********************\n')
+#                  cat('      Too many missing   ********************\n')
                   next
                }
-               cat('      Is okay...\n')
+#               cat('      Is okay...\n')
                if(!got.layers) {                                                          #             if we don't have data yet,
-                  cat('      Reading layers...\n')
-                  lay.vals <- lapply(lays, read.layers)                                   #                read current block of all 4 ecoConnect layers as matrices
+#                  cat('      Reading layers...\n')
+                  lay.vals <- lapply(lays, function(x) index.rast(x, s, block.idx))       #                read current block of all 4 ecoConnect layers as matrices
                   got.layers <- TRUE
                   success <- TRUE
                }
@@ -185,10 +190,10 @@
          
       })
       
-      cat('Finished calculating quantiles for ', c('full region', 'states', 'HUC8s'), '.\n', sep = '')
+      cat('Finished calculating quantiles for ', c('full region', 'states', 'HUC8s')[h], '.\n', sep = '')
    }
    
- 
+   
    cat('Writing results...\n')
    x <- list(quantiles.full = quantiles.full, quantiles.state = quantiles.state, quantiles.huc = quantiles.huc)
    saveRDS(x, f <- paste0(sourcepath, 'ecoConnect_quantiles.RDS'))                        # write quantiles to RDS
