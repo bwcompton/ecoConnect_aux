@@ -56,7 +56,7 @@
    
    handlers(global = TRUE)                                                                   # for progress bar
    handlers('rstudio')
-   skip <- 10                                                                                # report progress every skipth iteration
+   skip <- 20                                                                                # report progress every skipth iteration
    pb <- progressor(n / skip)
    
    
