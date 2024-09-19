@@ -130,7 +130,8 @@
                   }
                }
                statehuc[i, ] <- unpack(sh[floor(max.block / 2), floor(max.block / 2)])       #       get state and HUC ids
-               pb()                                                                          #       update progress bar
+               if(i %% 100 == 0)                                                             #       update progress bar every 100th iteration
+                  pb()
             }
          }
       }
