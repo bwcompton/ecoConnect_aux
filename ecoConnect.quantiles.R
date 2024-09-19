@@ -54,6 +54,11 @@
    
    library(terra)
    library(lubridate)
+   library(progressr)
+   
+   handlers(global = TRUE)                                                                   # for progress bar
+   handlers('rstudio')
+   pb <- progressor(n)
    
    
    'index.rast' <- function(x, s, indices = 0) {                                             # index block of a raster object without blowing up on lower edges
@@ -136,6 +141,7 @@
                   }
                }
                statehuc[i, ] <- unpack(sh[floor(max.block / 2), floor(max.block / 2)])       #       get state and HUC ids
+               pb()                                                                          #       update progress bar
             }
          }
       }
