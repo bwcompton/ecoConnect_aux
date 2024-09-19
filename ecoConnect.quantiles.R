@@ -39,7 +39,7 @@
    #     tables of region/state name/huc ID by acres with sample sizes
    #     
    #  realized.acres (printed to console)
-   #     a conversion from nominal acres to actual acerage of pseudoparcels. Use this in _________________ when interpolating percentiles for a given parcel.
+   #     a conversion from nominal acres to actual acerage of pseudoparcels. Use this in make.report.percentiles when interpolating percentiles for a given parcel.
    #     
    # Notes:
    #    - we're reading the max block size if there are any nodata cells in block, which will be inefficient near edges
@@ -47,9 +47,6 @@
    # 
    # B. Compton, 12 Sep 2024 (from ecoConnect.big.quantiles)
    
-   
-   #   n <<- n;acres<<-acres;best.pct <<- best.pct; layers <<- layers;server.names <<- server.names; sourcepath <<- sourcepath; threshold <<- threshold
-   #   return()
    
    
    library(terra)
@@ -107,26 +104,17 @@
    
    # gather samples
    for(i in 1:n) {                                                                           # For each sample,
-      cat('Trying ', i, '...\n', sep = '')
       success <- FALSE
       while(!success) {                                                                      #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                            #    index of sample
-         # cat('s = ', s[1], ', ', s[2], '\n', sep = '') 
          if(!is.na(index.rast(shindex, s, 0))) {                                             #    if focal cell has data,
             sh <- index.rast(shindex, s, block.idx)                                          #       read shindex for block
-            #         cat(c('   no data', '   got data')[any(!is.na(x)) + 1], '\n')
             if(any(!is.na(sh))) {                                                            #       If there are any data, continue
                got.layers <- FALSE
                for(j in 1:length(acres)) {                                                   #          for each block size,
-                  #               cat('   ', acres[j], ' acres\n')
                   if(sum(is.na(sh[block.indices[[j]], block.indices[[j]]])) > thresholds[j]) #          bail if too many missing cells   
-                  {
-                     #                  cat('      Too many missing   ********************\n')
                      next
-                  }
-                  #               cat('      Is okay...\n')
                   if(!got.layers) {                                                          #                if we don't have data yet,
-                     #                  cat('      Reading layers...\n')
                      lay.vals <- lapply(lays, function(x) index.rast(x, s, block.idx))       #                   read current block of all 4 ecoConnect layers as matrices
                      got.layers <- TRUE
                      success <- TRUE
