@@ -56,8 +56,8 @@
    
    handlers(global = TRUE)                                                                   # for progress bar
    handlers('rstudio')
-   pb <- progressor(n)
    skip <- 10                                                                                # report progress every skipth iteration
+   pb <- progressor(n / skip)
    
    
    
@@ -133,7 +133,7 @@
                }
                statehuc[i, ] <- unpack(sh[floor(max.block / 2), floor(max.block / 2)])       #       get state and HUC ids
                if(i %% skip == 0)                                                            #       update progress bar every nth iteration
-                  pb(skip)
+                  pb()
             }
          }
       }
