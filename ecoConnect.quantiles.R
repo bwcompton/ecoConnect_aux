@@ -42,6 +42,7 @@
    #     a conversion from nominal acres to actual acerage of pseudoparcels. Use this in make.report.percentiles when interpolating percentiles for a given parcel.
    #     
    # Notes:
+   #    - blocks with NA in the center cell are rejected, as are any blocks that are more than threshold missing
    #    - we're reading the max block size if there are any nodata cells in block, which will be inefficient near edges
    #      where smaller blocks have enough data but larger ones don't, but I'm opting for simplicity and clarity over speed
    # 
@@ -141,35 +142,34 @@
    # Result samples.* are 2d arrays of region x acres with sample sizes
    
    
-   rc <- c(1, max(sinfo$class), max(hinfo$class))                                         # number of classes in each region (1 for full, 14 states, 245 HUCs)
-   
+   rc <- c(1, max(sinfo$class), max(hinfo$class))                                            # number of classes in each region (1 for full, 14 states, 245 HUCs)
    
    # Now take percentiles and sample sizes
-   for(h in 1:length(rc)) {                                                               # For each set of regions,
-      qu <- array(NA, dim = c(rc[h], length(acres), length(layers), 2, 100))              #    quantiles for region set
-      ss <- array(NA, dim = c(rc[h], length(acres)))                                      #    sample sizes for region set
-      for(i in 1:rc[h]) {                                                                 #    For each region,
-         if(h == 1)                                                                       #       Select samples that fall in region
+   for(h in 1:length(rc)) {                                                                  # For each set of regions,
+      qu <- array(NA, dim = c(rc[h], length(acres), length(layers), 2, 100))                 #    quantiles for region set
+      ss <- array(NA, dim = c(rc[h], length(acres)))                                         #    sample sizes for region set
+      for(i in 1:rc[h]) {                                                                    #    For each region,
+         if(h == 1)                                                                          #       Select samples that fall in region
             y <- z
          else {
-            if(!i %in% statehuc[, h - 1])                                                 #       just to be safe, though all states and HUCs should be represented
+            if(!i %in% statehuc[, h - 1])                                                    #       just to be safe, though all states and HUCs should be represented
                next
             y <- z[statehuc[, h - 1] == i, , , , drop = FALSE]
          }
-         for(j in 1:length(acres)) {                                                      #       For each block size,
-            ss[i, j] <- sum(!is.na(y[ , j, 1, 1]))                                        #          collect sample sizes (identical across systems and all/best)
-            for(k in 1:length(layers)) {                                                  #          For each layer,
-               for(l in 1:2) {                                                            #             For all/best,   
+         for(j in 1:length(acres)) {                                                         #       For each block size,
+            ss[i, j] <- sum(!is.na(y[ , j, 1, 1]))                                           #          collect sample sizes (identical across systems and all/best)
+            for(k in 1:length(layers)) {                                                     #          For each layer,
+               for(l in 1:2) {                                                               #             For all/best,   
                   qu[i, j, k, l, ] <- quantile(y[, j, k, l], 
                                                prob = seq(0.01, 1, by = 0.01),  
-                                               na.rm = TRUE, names = FALSE)               #                take percentiles
+                                               na.rm = TRUE, names = FALSE)                  #                take percentiles
                } 
             }  
          }
       }
       
       ss[is.na(ss)] <- 0
-      switch(h, {                                                                         # save results to appropriate region variable
+      switch(h, {                                                                            # save results to appropriate region variable
          quantiles.full <- qu
          samples.full <- data.frame(ss)
          names(samples.full) <- acres
