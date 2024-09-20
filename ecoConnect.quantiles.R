@@ -58,7 +58,7 @@
    handlers(global = TRUE)                                                                   # for progress bar
    handlers('rstudio')
    skip <- 40                                                                                # report progress every skipth iteration
-   pb <- progressor(n / skip)
+   pb <- progressor((n / skip) + 1)
    
    
    
@@ -78,7 +78,7 @@
    
    ts <- Sys.time()
    
-   # come up with indices for each specified acerage 
+   # come up with indices for each specified acreage 
    cells.per.acre <- 4.496507136                                                             # 1 acre = 4.5 cells
    w <- sqrt(acres * cells.per.acre)                                                         # convert acres to width in cells
    w <- ifelse((floor(w) %% 2) != 0, floor(w), ceiling(w))                                   # pick nearest odd width in cells
@@ -108,6 +108,7 @@
    
    # gather samples
    for(i in 1:n) {                                                                           # For each sample,
+      pb()
       success <- FALSE
       while(!success) {                                                                      #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                            #    index of sample
