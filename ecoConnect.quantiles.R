@@ -1,8 +1,8 @@
 'ecoConnect.quantiles' <- function(n = 10000, postfix = '', acres  = c(1, 10, 100, 1000), best.pct = 0.5, 
-                                   layers = c('forests', 'ridgetops', 'wetlands', 'floodplains' ), 
-                                   server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
-                                   sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', 
-                                   threshold = 0.25) {
+   layers = c('forests', 'ridgetops', 'wetlands', 'floodplains' ), 
+   server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
+   sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', 
+   threshold = 0.25) {
    
    
    # Calculate percentiles of simulated parcels of ecoConnect layers and save files for ecoConnect.tool
@@ -57,15 +57,15 @@
    
    handlers(global = TRUE)                                                                   # for progress bar
    handlers('rstudio')
-   skip <- 40                                                                                # report progress every skipth iteration
-   pb <- progressor((n / skip) + 1)
+   skip <- 10                                                                                # report progress every skipth iteration
+   pb <- suppressWarnings(progressor(n / skip))
    
    
    
    'index.rast' <- function(x, s, indices = 0) {                                             # index block of a raster object without blowing up on lower edges
       i <- list(s[1] + indices, s[2] + indices)                                              # row and column indices, taking 1st col/row beyond lower edge
       z <- matrix(unlist(x[pmax(i[[1]], 1), pmax(i[[2]], 1)], use.names = FALSE), 
-                  length(indices), length(indices), byrow = TRUE)                            # read block and convert to matrix
+         length(indices), length(indices), byrow = TRUE)                            # read block and convert to matrix
       z[i[[1]] < 1, ] <- NA                                                                  # nuke rows off north edge, and columns off west edge
       z[, i[[2]] < 1] <- NA
       z
@@ -84,7 +84,7 @@
    w <- ifelse((floor(w) %% 2) != 0, floor(w), ceiling(w))                                   # pick nearest odd width in cells
    realized.acres <- w^2 / cells.per.acre                                                    # realized acres - use for interpolation
    cat('realized.acres <- c(', paste0(round(realized.acres, 4), collapse = ', '),
-       ') # Realized acres for interpolation\n', sep = '')    
+      ') # Realized acres for interpolation\n', sep = '')    
    rel.indices <- lapply(w, function(x) -floor(x / 2):floor(x / 2))                          # indices for each block size, relative to center
    block.idx <- rel.indices[[length(rel.indices)]]                                           # relative indices for full block (we'll use this inside loop)
    
@@ -108,7 +108,6 @@
    
    # gather samples
    for(i in 1:n) {                                                                           # For each sample,
-      pb()
       success <- FALSE
       while(!success) {                                                                      #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                            #    index of sample
@@ -130,7 +129,7 @@
                      y[is.na(sh[block.indices[[j]], block.indices[[j]]])] <- NA              #                mask from shindex
                      z[i, j, k, 1] <- mean(y, na.rm = TRUE)                                  #                sample all values
                      z[i, j, k, 2] <- mean(y[y >= quantile(y, best.pct, na.rm = TRUE)], 
-                                           na.rm = TRUE)                                     #                sample top best.pct
+                        na.rm = TRUE)                                     #                sample top best.pct
                   }
                }
                statehuc[i, ] <- unpack(sh[floor(max.block / 2), floor(max.block / 2)])       #       get state and HUC ids
@@ -142,11 +141,12 @@
    }
    
    
+   
    # Intermediate result z is 4d array of row x acres x systems x all/best
    # Result quantiles.* are 5d arrays of region x acres x systems x all/best x 100 with percentiles
    # Result samples.* are 2d arrays of region x acres with sample sizes
    
-   
+   cat('Calculating percentiles...\n')
    rc <- c(1, max(sinfo$class), max(hinfo$class))                                            # number of classes in each region (1 for full, 14 states, 245 HUCs)
    
    # Now take percentiles and sample sizes
@@ -166,8 +166,8 @@
             for(k in 1:length(layers)) {                                                     #          For each layer,
                for(l in 1:2) {                                                               #             For all/best,   
                   qu[i, j, k, l, ] <- quantile(y[, j, k, l], 
-                                               prob = seq(0.01, 1, by = 0.01),  
-                                               na.rm = TRUE, names = FALSE)                  #                take percentiles
+                     prob = seq(0.01, 1, by = 0.01),  
+                     na.rm = TRUE, names = FALSE)                  #                take percentiles
                } 
             }  
          }
@@ -179,17 +179,17 @@
          samples.full <- data.frame(ss)
          names(samples.full) <- acres
       },
-      {
-         quantiles.state <- qu
-         samples.state <- data.frame(cbind(sinfo$postal[match(sinfo$class, 1:dim(sinfo)[1])]), ss)
-         names(samples.state) <- c('Postal', acres)
-      },
-      {
-         quantiles.huc <- qu
-         samples.huc <- data.frame(cbind(hinfo$HUC8_code[match(hinfo$class, 1:dim(hinfo)[1])]), ss)
-         names(samples.huc) <- c('HUC8_code', acres)
-         
-      })
+         {
+            quantiles.state <- qu
+            samples.state <- data.frame(cbind(sinfo$postal[match(sinfo$class, 1:dim(sinfo)[1])]), ss)
+            names(samples.state) <- c('Postal', acres)
+         },
+         {
+            quantiles.huc <- qu
+            samples.huc <- data.frame(cbind(hinfo$HUC8_code[match(hinfo$class, 1:dim(hinfo)[1])]), ss)
+            names(samples.huc) <- c('HUC8_code', acres)
+            
+         })
       
       cat('Finished calculating quantiles for ', c('full region', 'states', 'HUC8s')[h], '.\n', sep = '')
    }
