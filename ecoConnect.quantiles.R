@@ -1,4 +1,4 @@
-'ecoConnect.quantiles' <- function(n = 10000, acres  = c(1, 10, 100, 1000), best.pct = 0.5, 
+'ecoConnect.quantiles' <- function(n = 10000, postfix = '', acres  = c(1, 10, 100, 1000), best.pct = 0.5, 
                                    layers = c('forests', 'ridgetops', 'wetlands', 'floodplains' ), 
                                    server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
                                    sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', 
@@ -11,6 +11,7 @@
    # 
    # Arguments:
    #   n                   number of samples
+   #   postfix             add to the end of result filenames
    #   acres               target parcel sizes in acres                             *** want to include 1e4, 1e5 for final run
    #   best.pct            top percent of pseudoparcels for "best," as proportion 
    #   layers              source system names
@@ -56,7 +57,7 @@
    
    handlers(global = TRUE)                                                                   # for progress bar
    handlers('rstudio')
-   skip <- 20                                                                                # report progress every skipth iteration
+   skip <- 40                                                                                # report progress every skipth iteration
    pb <- progressor(n / skip)
    
    
@@ -195,11 +196,11 @@
    
    cat('Writing results...\n')
    x <- list(quantiles.full = quantiles.full, quantiles.state = quantiles.state, quantiles.huc = quantiles.huc)
-   saveRDS(x, f <- paste0(sourcepath, 'ecoConnect_quantiles.RDS'))                        # write quantiles to RDS
+   saveRDS(x, f <- paste0(sourcepath, 'ecoConnect_quantiles', posfix, '.RDS'))               # write quantiles to RDS
    
-   write.table(samples.full, paste0(sourcepath, 'sample_sizes_full.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
-   write.table(samples.state, paste0(sourcepath, 'sample_sizes_state.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
-   write.table(samples.huc, paste0(sourcepath, 'sample_sizes_huc.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+   write.table(samples.full, paste0(sourcepath, 'sample_sizes_full', posfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
+   write.table(samples.state, paste0(sourcepath, 'sample_sizes_state', posfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+   write.table(samples.huc, paste0(sourcepath, 'sample_sizes_huc', posfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
    
    cat('Results written to ', f, '\n', sep = '')
    cat('Total time taken: ', format(seconds_to_period(round(as.duration(interval(ts, Sys.time()))))), '\n', sep = '')
