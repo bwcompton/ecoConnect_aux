@@ -198,9 +198,9 @@
    x <- list(quantiles.full = quantiles.full, quantiles.state = quantiles.state, quantiles.huc = quantiles.huc)
    saveRDS(x, f <- paste0(sourcepath, 'ecoConnect_quantiles', posfix, '.RDS'))               # write quantiles to RDS
    
-   write.table(samples.full, paste0(sourcepath, 'sample_sizes_full', posfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
-   write.table(samples.state, paste0(sourcepath, 'sample_sizes_state', posfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
-   write.table(samples.huc, paste0(sourcepath, 'sample_sizes_huc', posfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+   write.table(samples.full, paste0(sourcepath, 'sample_sizes_full', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
+   write.table(samples.state, paste0(sourcepath, 'sample_sizes_state', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+   write.table(samples.huc, paste0(sourcepath, 'sample_sizes_huc', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
    
    cat('Results written to ', f, '\n', sep = '')
    cat('Total time taken: ', format(seconds_to_period(round(as.duration(interval(ts, Sys.time()))))), '\n', sep = '')
