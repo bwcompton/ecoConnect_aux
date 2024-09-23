@@ -166,8 +166,6 @@
                   }
                }
                
-               if(any(shx != sh[ceiling(idx$max.block / 2), ceiling(idx$max.block / 2)]))
-                  browser()
                statehuc[i, ] <- unpack(sh[ceiling(idx$max.block / 2), 
                                           ceiling(idx$max.block / 2)])                          #       get state and HUC ids
                if(i %% skip == 0)                                                               #       update progress bar every nth iteration
