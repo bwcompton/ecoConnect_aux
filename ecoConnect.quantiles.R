@@ -135,7 +135,7 @@
    statehuc <- data.frame(matrix(NA, n, 2))
    names(statehuc) <- c('state', 'huc')            # state and HUC8 for each sample
    z <- array(NA, dim = c(n, length(idx$w), length(layers), 2))                                 # row x acres x systems x all/best
-   
+   cat('Gathering ', n, ' samples...\n', sep = '')
    
    # gather samples
    for(i in 1:n) {                                                                              # For each sample,
