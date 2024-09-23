@@ -54,6 +54,10 @@
    
    
    
+   call.args <- as.list(environment())
+   launch <- now()
+   
+      
    library(terra)
    library(lubridate)
    library(progressr)
@@ -95,7 +99,7 @@
       idx$block.idx <- idx$rel.indices[[length(idx$rel.indices)]]                               #    relative indices for full block (we'll use this inside loop)
       idx$block.indices <- lapply(idx$rel.indices, function(x) x + ceiling(idx$max.block / 2))  #    indices for each block size, absolute for max block 
       idx$next.drop <- min(idx$n / idx$n.factor)                                                #    we'll revisit this when we reach this iteration
-      cat('--- ', idx$next.drop, ' ---\n', sep = '')
+    ##  cat('--- ', idx$next.drop, ' ---\n', sep = '')
       idx
    }
    
@@ -112,8 +116,7 @@
    idx$w <- ifelse((floor(idx$w) %% 2) != 0, floor(idx$w), ceiling(idx$w))                      # pick nearest odd width in cells
    idx$thresholds <- idx$w^2 * threshold                                                        # NA thresholds in cells for each block size 
    realized.acres <- idx$w^2 / cells.per.acre                                                   # realized acres - use for interpolation
-   cat('realized.acres <- c(', paste0(round(realized.acres, 4), collapse = ', '),
-       ') # Realized acres for interpolation\n', sep = '')    
+   
    idx$rel.indices <- lapply(idx$w, function(x) -floor(x / 2):floor(x / 2))                     # indices for each block size, relative to center
    idx$n <- rep(n, length(acres))
    idx$n.factor <- n.factor
@@ -136,7 +139,7 @@
    
    # gather samples
    for(i in 1:n) {                                                                              # For each sample,
-      print(c(i, idx$acres))
+   ##   print(c(i, idx$acres))
       success <- FALSE
       while(!success) {                                                                         #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                               #    index of sample
@@ -235,12 +238,27 @@
    
    cat('Writing results...\n')
    x <- list(quantiles.full = quantiles.full, quantiles.state = quantiles.state, quantiles.huc = quantiles.huc)
-   saveRDS(x, f <- paste0(sourcepath, 'ecoConnect_quantiles', postfix, '.RDS'))               # write quantiles to RDS
+   saveRDS(x, f <- paste0(sourcepath, 'ecoConnect_quantiles_', postfix, '.RDS'))               # write quantiles to RDS
    
-   write.table(samples.full, paste0(sourcepath, 'sample_sizes_full', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
-   write.table(samples.state, paste0(sourcepath, 'sample_sizes_state', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
-   write.table(samples.huc, paste0(sourcepath, 'sample_sizes_huc', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+   write.table(samples.full, paste0(sourcepath, 'sample_sizes_full_', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
+   write.table(samples.state, paste0(sourcepath, 'sample_sizes_state_', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+   write.table(samples.huc, paste0(sourcepath, 'sample_sizes_huc_', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
    
-   cat('Results written to ', f, '\n', sep = '')
-   cat('Total time taken: ', format(seconds_to_period(round(as.duration(interval(ts, Sys.time()))))), '\n', sep = '')
+   elapsed <- format(seconds_to_period(round(as.duration(interval(ts, Sys.time())))))
+   
+   fileConnect <- file(filename <- paste0(sourcepath, 'metadata_', postfix, '.txt'))            # write metadata file
+   x <- (paste0('Metadata for ecoConnect.quantiles run launched ', launch))
+   x <- c(x, paste0('Total time taken: ', elapsed, '\n'))
+   x <- c(x, paste0('realized.acres <- c(', paste0(round(realized.acres, 4), collapse = ', '),
+            ') # Realized acres for interpolation\n'))
+   x <- c(x, 'Arguments:\n')
+   writeLines(x, fileConnect)
+   close(fileConnect)
+   
+   sink(filename, append = TRUE)
+   print(call.args)
+   sink()
+   
+   cat('Results written to ', sourcepath, '*_', postfix, '.*\n', sep = '')
+   cat('Total time taken: ', elapsed, '\n', sep = '')
 }
