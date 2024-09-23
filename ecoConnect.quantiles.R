@@ -1,8 +1,8 @@
 'ecoConnect.quantiles' <- function(n = 1e8, n.factor = c(1, 1, 1, 1, 1e2, 1e3, 1e4), acres  = c(1, 10, 100, 1000, 1e4, 1e5, 1e6), 
-                                   best.pct = 0.5, layers = c('forests', 'ridgetops', 'wetlands', 'floodplains' ), 
-                                   server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
-                                   sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
-                                   threshold = 0.25) {
+   best.pct = 0.5, layers = c('forests', 'ridgetops', 'wetlands', 'floodplains' ), 
+   server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
+   sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
+   threshold = 0.25) {
    
    
    # Calculate percentiles of simulated parcels of ecoConnect layers and save files for ecoConnect.tool
@@ -57,7 +57,7 @@
    call.args <- as.list(environment())
    launch <- now()
    
-      
+   
    library(terra)
    library(lubridate)
    library(progressr)
@@ -78,7 +78,7 @@
    'index.rast' <- function(x, s, indices = 0) {                                                # Index block of a raster object without blowing up on lower edges
       i <- list(s[1] + indices, s[2] + indices)                                                 #    row and column indices, taking 1st col/row beyond lower edge
       z <- matrix(unlist(x[pmax(i[[1]], 1), pmax(i[[2]], 1)], use.names = FALSE), 
-                  length(indices), length(indices), byrow = TRUE)                               #    read block and convert to matrix
+         length(indices), length(indices), byrow = TRUE)                               #    read block and convert to matrix
       z[i[[1]] < 1, ] <- NA                                                                     #    nuke rows off north edge, and columns off west edge
       z[, i[[2]] < 1] <- NA
       z
@@ -99,7 +99,7 @@
       idx$block.idx <- idx$rel.indices[[length(idx$rel.indices)]]                               #    relative indices for full block (we'll use this inside loop)
       idx$block.indices <- lapply(idx$rel.indices, function(x) x + ceiling(idx$max.block / 2))  #    indices for each block size, absolute for max block 
       idx$next.drop <- min(idx$n / idx$n.factor)                                                #    we'll revisit this when we reach this iteration
-      cat('--- ', idx$next.drop, ' ---\n', sep = '')
+      ###      cat('--- ', idx$next.drop, ' ---\n', sep = '')
       idx
    }
    
@@ -139,17 +139,17 @@
    
    # gather samples
    for(i in 1:n) {                                                                              # For each sample,
-      print(c(i, idx$acres))
+      ###      print(c(i, idx$acres))
       success <- FALSE
       while(!success) {                                                                         #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                               #    index of sample
-         if(!is.na(shx <- index.rast(shindex, s, 0))) {                                                #    if focal cell has data,
+         if(!is.na(index.rast(shindex, s, 0))) {                                                #    if focal cell has data,
             sh <- index.rast(shindex, s, idx$block.idx)                                         #       read shindex for block
             if(any(!is.na(sh))) {                                                               #       If there are any data, continue
                got.layers <- FALSE
                for(j in 1:length(idx$acres)) {                                                  #          for each block size,
                   if(sum(is.na(sh[idx$block.indices[[j]], idx$block.indices[[j]]])) > 
-                     idx$thresholds[j])                                                         #          bail if too many missing cells   
+                        idx$thresholds[j])                                                         #          bail if too many missing cells   
                      next
                   if(!got.layers) {                                                             #                if we don't have data yet,
                      lay.vals <- lapply(lays, function(x) index.rast(x, s, idx$block.idx))      #                   read current block of all 4 ecoConnect layers as matrices
@@ -162,18 +162,14 @@
                      y[is.na(sh[idx$block.indices[[j]], idx$block.indices[[j]]])] <- NA         #                mask from shindex
                      z[i, j, k, 1] <- mean(y, na.rm = TRUE)                                     #                sample all values
                      z[i, j, k, 2] <- mean(y[y >= quantile(y, best.pct, na.rm = TRUE)], 
-                                           na.rm = TRUE)                                        #                sample top best.pct
+                        na.rm = TRUE)                                        #                sample top best.pct
                   }
                }
                
-               cat('\n')
-        #       print(shx)
-        #       print(sh[floor(idx$max.block / 2), floor(idx$max.block / 2)])
-               
-               if(any(shx != sh[floor(idx$max.block / 2), floor(idx$max.block / 2)]))
-                  debug()
+               if(any(shx != sh[ceiling(idx$max.block / 2), ceiling(idx$max.block / 2)]))
+                  browser()
                statehuc[i, ] <- unpack(sh[ceiling(idx$max.block / 2), 
-                                          ceiling(idx$max.block / 2)])                          #       get state and HUC ids
+                  ceiling(idx$max.block / 2)])                          #       get state and HUC ids
                if(i %% skip == 0)                                                               #       update progress bar every nth iteration
                   suppressWarnings(pb())
             }
@@ -211,8 +207,8 @@
             for(k in 1:length(layers)) {                                                        #          For each layer,
                for(l in 1:2) {                                                                  #             For all/best,   
                   qu[i, j, k, l, ] <- quantile(y[, j, k, l], 
-                                               prob = seq(0.01, 1, by = 0.01),  
-                                               na.rm = TRUE, names = FALSE)                     #                take percentiles
+                     prob = seq(0.01, 1, by = 0.01),  
+                     na.rm = TRUE, names = FALSE)                     #                take percentiles
                } 
             }  
          }
@@ -224,17 +220,17 @@
          samples.full <- data.frame(ss)
          names(samples.full) <- acres
       },
-      {
-         quantiles.state <- qu
-         samples.state <- data.frame(cbind(sinfo$postal[match(sinfo$class, 1:dim(sinfo)[1])]), ss)
-         names(samples.state) <- c('Postal', acres)
-      },
-      {
-         quantiles.huc <- qu
-         samples.huc <- data.frame(cbind(hinfo$HUC8_code[match(hinfo$class, 1:dim(hinfo)[1])]), ss)
-         names(samples.huc) <- c('HUC8_code', acres)
-         
-      })
+         {
+            quantiles.state <- qu
+            samples.state <- data.frame(cbind(sinfo$postal[match(sinfo$class, 1:dim(sinfo)[1])]), ss)
+            names(samples.state) <- c('Postal', acres)
+         },
+         {
+            quantiles.huc <- qu
+            samples.huc <- data.frame(cbind(hinfo$HUC8_code[match(hinfo$class, 1:dim(hinfo)[1])]), ss)
+            names(samples.huc) <- c('HUC8_code', acres)
+            
+         })
       
       cat('Finished calculating quantiles for ', c('full region', 'states', 'HUC8s')[h], '.\n', sep = '')
    }
@@ -254,7 +250,7 @@
    x <- (paste0('Metadata for ecoConnect.quantiles run launched ', launch))
    x <- c(x, paste0('Total time taken: ', elapsed, '\n'))
    x <- c(x, paste0('realized.acres <- c(', paste0(round(realized.acres, 4), collapse = ', '),
-            ') # Realized acres for interpolation\n'))
+      ') # Realized acres for interpolation\n'))
    x <- c(x, 'Arguments:\n')
    writeLines(x, fileConnect)
    close(fileConnect)
