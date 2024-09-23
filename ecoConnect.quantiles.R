@@ -140,7 +140,7 @@
       success <- FALSE
       while(!success) {                                                                         #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                               #    index of sample
-         if(!is.na(index.rast(shindex, s, 0))) {                                                #    if focal cell has data,
+         if(!is.na(shx <- index.rast(shindex, s, 0))) {                                                #    if focal cell has data,
             sh <- index.rast(shindex, s, idx$block.idx)                                         #       read shindex for block
             if(any(!is.na(sh))) {                                                               #       If there are any data, continue
                got.layers <- FALSE
@@ -162,6 +162,9 @@
                                            na.rm = TRUE)                                        #                sample top best.pct
                   }
                }
+               
+               if(any(shx != sh[floor(idx$max.block / 2), floor(idx$max.block / 2)]))
+                  debug()
                statehuc[i, ] <- unpack(sh[floor(idx$max.block / 2), 
                                           floor(idx$max.block / 2)])                            #       get state and HUC ids
                if(i %% skip == 0)                                                               #       update progress bar every nth iteration
