@@ -99,7 +99,7 @@
       idx$block.idx <- idx$rel.indices[[length(idx$rel.indices)]]                               #    relative indices for full block (we'll use this inside loop)
       idx$block.indices <- lapply(idx$rel.indices, function(x) x + ceiling(idx$max.block / 2))  #    indices for each block size, absolute for max block 
       idx$next.drop <- min(idx$n / idx$n.factor)                                                #    we'll revisit this when we reach this iteration
-    ##  cat('--- ', idx$next.drop, ' ---\n', sep = '')
+      cat('--- ', idx$next.drop, ' ---\n', sep = '')
       idx
    }
    
@@ -139,7 +139,7 @@
    
    # gather samples
    for(i in 1:n) {                                                                              # For each sample,
-   ##   print(c(i, idx$acres))
+      print(c(i, idx$acres))
       success <- FALSE
       while(!success) {                                                                         #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                               #    index of sample
@@ -165,6 +165,10 @@
                                            na.rm = TRUE)                                        #                sample top best.pct
                   }
                }
+               
+               cat('\n')
+               print(shx)
+               print(sh[floor(idx$max.block / 2), floor(idx$max.block / 2)])
                
                if(any(shx != sh[floor(idx$max.block / 2), floor(idx$max.block / 2)]))
                   debug()
