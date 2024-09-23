@@ -167,13 +167,13 @@
                }
                
                cat('\n')
-               print(shx)
-               print(sh[floor(idx$max.block / 2), floor(idx$max.block / 2)])
+        #       print(shx)
+        #       print(sh[floor(idx$max.block / 2), floor(idx$max.block / 2)])
                
                if(any(shx != sh[floor(idx$max.block / 2), floor(idx$max.block / 2)]))
                   debug()
-               statehuc[i, ] <- unpack(sh[floor(idx$max.block / 2), 
-                                          floor(idx$max.block / 2)])                            #       get state and HUC ids
+               statehuc[i, ] <- unpack(sh[ceiling(idx$max.block / 2), 
+                                          ceiling(idx$max.block / 2)])                          #       get state and HUC ids
                if(i %% skip == 0)                                                               #       update progress bar every nth iteration
                   suppressWarnings(pb())
             }
