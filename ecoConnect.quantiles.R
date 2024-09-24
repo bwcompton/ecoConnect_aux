@@ -55,12 +55,15 @@
    
    
    call.args <- as.list(environment())
-   launch <- now()
    
    
    library(terra)
    library(lubridate)
    library(progressr)
+   
+   launch <- now()
+   ts <- Sys.time()
+   
    
    handlers(global = TRUE)                                                                      # for progress bar
    handlers('rstudio')
@@ -107,7 +110,6 @@
       c(floor(x / 1000), x - floor(x / 1000) * 1000)
    
    
-   ts <- Sys.time()
    
    # come up with indices for each specified acreage 
    cells.per.acre <- 4.496507136                                                                # 1 acre = 4.5 cells
@@ -135,7 +137,7 @@
    statehuc <- data.frame(matrix(NA, n, 2))
    names(statehuc) <- c('state', 'huc')            # state and HUC8 for each sample
    z <- array(NA, dim = c(n, length(idx$w), length(layers), 2))                                 # row x acres x systems x all/best
-   cat('Gathering ', n, ' samples...\n', sep = '')
+   cat('Gathering ', format(n, scientific = FALSE, big.mark = ','), ' samples...\n', sep = '')
    
    # gather samples
    for(i in 1:n) {                                                                              # For each sample,
