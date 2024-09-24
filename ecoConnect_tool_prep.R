@@ -53,8 +53,8 @@
       geoTIFF4web(paste0(shindex.source.path, 'shindex.tif'), 'shindex.tif',
                   resultpath = shindex.result.path, auto = TRUE)
       
-      file.copy(paste0(shindex.source.path, 'hucinfo.txt', shindex.result.path), overwrite = TRUE)
-      file.copy(paste0(shindex.source.path, 'stateinfo.txt', shindex.result.path), overwrite = TRUE)
+      file.copy(paste0(shindex.source.path, 'hucinfo.txt'), shindex.result.path, overwrite = TRUE)
+      file.copy(paste0(shindex.source.path, 'stateinfo.txt'), shindex.result.path, overwrite = TRUE)
    }
    
    cat('\nAll done.\n')
