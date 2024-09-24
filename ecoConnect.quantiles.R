@@ -237,17 +237,19 @@
    
    
    cat('Writing results...\n')
+   if(postfix != '')
+      postfix <- paste0('_', postfix)
    
    x <- list(quantiles.full = quantiles.full, quantiles.state = quantiles.state, quantiles.huc = quantiles.huc)
-   saveRDS(x, f <- paste0(sourcepath, 'ecoConnect_quantiles_', postfix, '.RDS'))               # write quantiles to RDS
+   saveRDS(x, f <- paste0(sourcepath, 'ecoConnect_quantiles', postfix, '.RDS'))               # write quantiles to RDS
    
-   write.table(samples.full, paste0(sourcepath, 'sample_sizes_full_', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
-   write.table(samples.state, paste0(sourcepath, 'sample_sizes_state_', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
-   write.table(samples.huc, paste0(sourcepath, 'sample_sizes_huc_', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+   write.table(samples.full, paste0(sourcepath, 'sample_sizes_full', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
+   write.table(samples.state, paste0(sourcepath, 'sample_sizes_state', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+   write.table(samples.huc, paste0(sourcepath, 'sample_sizes_huc', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
    
    elapsed <- format(seconds_to_period(round(as.duration(interval(ts, Sys.time())))))
    
-   fileConnect <- file(filename <- paste0(sourcepath, 'metadata_', postfix, '.txt'))            # write metadata file
+   fileConnect <- file(filename <- paste0(sourcepath, 'metadata', postfix, '.txt'))            # write metadata file
    x <- (paste0('Metadata for ecoConnect.quantiles run launched ', launch))
    x <- c(x, paste0('Total time taken: ', elapsed, '\n'))
    x <- c(x, paste0('realized.acres <- c(', paste0(round(realized.acres, 4), collapse = ', '),
@@ -260,6 +262,6 @@
    print(call.args)
    sink()
    
-   cat('Results written to ', sourcepath, '*_', postfix, '.*\n', sep = '')
+   cat('Results written to ', sourcepath, '*', postfix, '.*\n', sep = '')
    cat('Total time taken: ', elapsed, '\n', sep = '')
 }
