@@ -52,7 +52,7 @@
       cat('\nProcessing shindex...\n', sep = '')
       geoTIFF4web(paste0(shindex.source.path, 'shindex.tif'), 'shindex',
                   resultpath = shindex.result.path, auto = FALSE, rescale = FALSE, round = FALSE,
-                  type - 'INT2U', overviewResample = 'nearest')
+                  type = 'INT2U', overviewResample = 'nearest')
       
       file.copy(paste0(shindex.source.path, 'hucinfo.txt'), shindex.result.path, overwrite = TRUE)
       file.copy(paste0(shindex.source.path, 'stateinfo.txt'), shindex.result.path, overwrite = TRUE)
