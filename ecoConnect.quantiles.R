@@ -49,6 +49,7 @@
    #      where smaller blocks have enough data but larger ones don't, but I'm opting for simplicity and clarity over speed
    #    - we use n.factor to drop sample sizes for larger blocks, which take a long time, and we care less about precision for them, as percentiles have
    #      less range, and it'll be rare for target area to be huge anyway
+   #    - this revised version keeps rasters in memory for a big speedup, but it's a memory hog--you'll need >> 64 GB
    # 
    # B. Compton, 12 Sep 2024 (from ecoConnect.big.quantiles)
    
@@ -78,12 +79,15 @@
       stop('n.factor and acres must correspond')
    
    
-   'index.rast' <- function(x, s, indices = 0) {                                                # Index block of a raster object without blowing up on lower edges
-      i <- list(s[1] + indices, s[2] + indices)                                                 #    row and column indices, taking 1st col/row beyond lower edge
-      z <- matrix(unlist(x[pmax(i[[1]], 1), pmax(i[[2]], 1)], use.names = FALSE), 
-                  length(indices), length(indices), byrow = TRUE)                               #    read block and convert to matrix
-      z[i[[1]] < 1, ] <- NA                                                                     #    nuke rows off north edge, and columns off west edge
-      z[, i[[2]] < 1] <- NA
+   'raster.as.matrix' <- function(x) {                                                          # Read an entire geoTIFF into memory as a matrix
+      matrix(rast(x), dim(x)[1], dim(x)[2], byrow = TRUE)
+   }
+   
+   'index.rast' <- function(x, s, indices = 0) {                                                # Index block of a matrix allowing indices beyond edges
+      i <- list(s[1] + indices, s[2] + indices)                                                 #    row and column indices
+      z <- x[pmin(pmax(i[[1]], 1), dim(x)[1]), pmin(pmax(i[[2]], 1), dim(x)[2])]                #    push indices beyond edges to 1st/last row/column
+      z[c(i[[1]] < 1, i[[1]] > dim(x)[1]), ] <- NA                                              #    now set rows and columns beyond edges to NA
+      z[, c(i[[2]] < 1, i[[2]] > dim(x)[2])] <- NA
       z
    }
    
@@ -102,7 +106,6 @@
       idx$block.idx <- idx$rel.indices[[length(idx$rel.indices)]]                               #    relative indices for full block (we'll use this inside loop)
       idx$block.indices <- lapply(idx$rel.indices, function(x) x + ceiling(idx$max.block / 2))  #    indices for each block size, absolute for max block 
       idx$next.drop <- min(idx$n / idx$n.factor)                                                #    we'll revisit this when we reach this iteration
-      ###      cat('--- ', idx$next.drop, ' ---\n', sep = '')
       idx
    }
    
@@ -127,8 +130,9 @@
    
    
    # read source data
-   shindex <- rast(paste0(sourcepath, 'shindex.tif'))                                           # combined state/HUC8 index and mask
-   lays <- lapply(layers, function(x) rast(paste0(sourcepath, 'ecoConnect_', x, '.tif')))
+   cat('Reading source data...\n')
+   shindex <- raster.as.matrix(paste0(sourcepath, 'shindex.tif'))                               # combined state/HUC8 index and mask
+   lays <- lapply(layers, raster.as.matrix(paste0(sourcepath, 'ecoConnect_', x, '.tif')))       # ecoConnect layers
    sinfo <- read.table(paste0(sourcepath, 'stateinfo.txt'), sep = '\t', header = TRUE)          # we'll use these for sample size tables
    hinfo <- read.table(paste0(sourcepath, 'hucinfo.txt'), sep = '\t', header = TRUE)
    
@@ -141,7 +145,6 @@
    
    # gather samples
    for(i in 1:n) {                                                                              # For each sample,
-      ###      print(c(i, idx$acres))
       success <- FALSE
       while(!success) {                                                                         #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                               #    index of sample
