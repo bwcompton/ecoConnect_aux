@@ -80,7 +80,9 @@
    
    
    'raster.as.matrix' <- function(x) {                                                          # Read an entire geoTIFF into memory as a matrix
+      cat('Reading ', x, '...\n', sep = '')
       z <- rast(x)
+      print(dim(z))
       matrix(z, dim(z)[1], dim(z)[2], byrow = TRUE)
    }
    
