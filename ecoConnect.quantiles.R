@@ -69,7 +69,7 @@
    handlers(global = TRUE)                                                                      # for progress bar
    handlers('rstudio')
    skip <- 10                                                                                   # report progress every skipth iteration
-   pb <- invisible(progressor(n / skip))
+   pb <- progressor(n / skip)
    
    if(!all(acres == sort(acres)))
       stop('acres must be in ascending order (and correspond with n.factor, if supplied')
@@ -79,18 +79,17 @@
       stop('n.factor and acres must correspond')
    
    
-   'raster.as.matrix' <- function(x) {                                                          # Read an entire geoTIFF into memory as a matrix
+   'read.tiff' <- function(x) {                                                                 # Read an entire geoTIFF into memory as a matrix
       cat('Reading ', x, '...\n', sep = '')
       z <- rast(x)
-      print(dim(z))
       matrix(z, dim(z)[1], dim(z)[2], byrow = TRUE)
    }
    
-   'index.block' <- function(x, s, indices = 0) {                                                # Index block of a matrix allowing indices beyond edges
+   'index.block' <- function(x, s, indices = 0) {                                               # Index block of a matrix allowing indices beyond edges
       i <- list(s[1] + indices, s[2] + indices)                                                 #    row and column indices
-      z <- x[pmin(pmax(i[[1]], 1), dim(x)[1]), pmin(pmax(i[[2]], 1), dim(x)[2])]                #    push indices beyond edges to 1st/last row/column
-      z[c(i[[1]] < 1, i[[1]] > dim(x)[1]), ] <- NA                                              #    now set rows and columns beyond edges to NA
-      z[, c(i[[2]] < 1, i[[2]] > dim(x)[2])] <- NA
+      z <- x[pmin(pmax(i[[1]], 1), dim(x)[1]), pmin(pmax(i[[2]], 1), dim(x)[2]), drop = FALSE]                #    push indices beyond edges to 1st/last row/column
+      z[(i[[1]] < 1) | (i[[1]] > dim(x)[1]), ] <- NA                                              #    now set rows and columns beyond edges to NA
+      z[, (i[[2]] < 1) | (i[[2]] > dim(x)[2])] <- NA
       z
    }
    
@@ -131,15 +130,14 @@
    
    idx <- set.up.indices(idx, n, n.factor)                                                      # set up indices; to be amended when we drop block sizes based on n.factor                                                                 
    
-   
+     
    # read source data
-   cat('Reading source data...\n')
-   shindex <- raster.as.matrix(paste0(sourcepath, 'shindex.tif'))                               # combined state/HUC8 index and mask
-   lays <- lapply(layers, raster.as.matrix(paste0(sourcepath, 'ecoConnect_', x, '.tif')))       # ecoConnect layers
+   shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
+   lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
    sinfo <- read.table(paste0(sourcepath, 'stateinfo.txt'), sep = '\t', header = TRUE)          # we'll use these for sample size tables
    hinfo <- read.table(paste0(sourcepath, 'hucinfo.txt'), sep = '\t', header = TRUE)
    
-   
+
    # create results
    statehuc <- data.frame(matrix(NA, n, 2))
    names(statehuc) <- c('state', 'huc')            # state and HUC8 for each sample
@@ -151,8 +149,8 @@
       success <- FALSE
       while(!success) {                                                                         #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                               #    index of sample
-         if(!is.na(index.block(shindex, s, 0))) {                                                #    if focal cell has data,
-            sh <- index.block(shindex, s, idx$block.idx)                                         #       read shindex for block
+         if(!is.na(index.block(shindex, s, 0))) {                                               #    if focal cell has data,
+            sh <- index.block(shindex, s, idx$block.idx)                                        #       read shindex for block
             if(any(!is.na(sh))) {                                                               #       If there are any data, continue
                got.layers <- FALSE
                for(j in 1:length(idx$acres)) {                                                  #          for each block size,
@@ -160,7 +158,7 @@
                      idx$thresholds[j])                                                         #          bail if too many missing cells   
                      next
                   if(!got.layers) {                                                             #                if we don't have data yet,
-                     lay.vals <- lapply(lays, function(x) index.block(x, s, idx$block.idx))      #                   read current block of all 4 ecoConnect layers as matrices
+                     lay.vals <- lapply(lays, function(x) index.block(x, s, idx$block.idx))     #                   read current block of all 4 ecoConnect layers as matrices
                      got.layers <- TRUE
                      success <- TRUE
                   }
