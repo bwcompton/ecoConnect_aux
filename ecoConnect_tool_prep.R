@@ -50,7 +50,7 @@
    
    if(shindex) {
       cat('\nProcessing shindex...\n', sep = '')
-      geoTIFF4web(paste0(shindex.source.path, 'shindex.tif'), 'shindex.tif',
+      geoTIFF4web(paste0(shindex.source.path, 'shindex.tif'), 'shindex',
                   resultpath = shindex.result.path, auto = FALSE, rescale = FALSE, round = FALSE,
                   type - 'INT2U', overviewResample = 'nearest')
       
