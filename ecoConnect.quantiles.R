@@ -80,10 +80,11 @@
    
    
    'raster.as.matrix' <- function(x) {                                                          # Read an entire geoTIFF into memory as a matrix
-      matrix(rast(x), dim(x)[1], dim(x)[2], byrow = TRUE)
+      z <- rast(x)
+      matrix(z, dim(z)[1], dim(z)[2], byrow = TRUE)
    }
    
-   'index.rast' <- function(x, s, indices = 0) {                                                # Index block of a matrix allowing indices beyond edges
+   'index.block' <- function(x, s, indices = 0) {                                                # Index block of a matrix allowing indices beyond edges
       i <- list(s[1] + indices, s[2] + indices)                                                 #    row and column indices
       z <- x[pmin(pmax(i[[1]], 1), dim(x)[1]), pmin(pmax(i[[2]], 1), dim(x)[2])]                #    push indices beyond edges to 1st/last row/column
       z[c(i[[1]] < 1, i[[1]] > dim(x)[1]), ] <- NA                                              #    now set rows and columns beyond edges to NA
@@ -148,8 +149,8 @@
       success <- FALSE
       while(!success) {                                                                         #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                               #    index of sample
-         if(!is.na(index.rast(shindex, s, 0))) {                                                #    if focal cell has data,
-            sh <- index.rast(shindex, s, idx$block.idx)                                         #       read shindex for block
+         if(!is.na(index.block(shindex, s, 0))) {                                                #    if focal cell has data,
+            sh <- index.block(shindex, s, idx$block.idx)                                         #       read shindex for block
             if(any(!is.na(sh))) {                                                               #       If there are any data, continue
                got.layers <- FALSE
                for(j in 1:length(idx$acres)) {                                                  #          for each block size,
@@ -157,7 +158,7 @@
                      idx$thresholds[j])                                                         #          bail if too many missing cells   
                      next
                   if(!got.layers) {                                                             #                if we don't have data yet,
-                     lay.vals <- lapply(lays, function(x) index.rast(x, s, idx$block.idx))      #                   read current block of all 4 ecoConnect layers as matrices
+                     lay.vals <- lapply(lays, function(x) index.block(x, s, idx$block.idx))      #                   read current block of all 4 ecoConnect layers as matrices
                      got.layers <- TRUE
                      success <- TRUE
                   }
