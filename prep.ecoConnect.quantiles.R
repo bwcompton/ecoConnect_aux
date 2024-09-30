@@ -1,26 +1,30 @@
-'prep.ecoConnect.quantiles' <- function(
-      states = 'x:/LCC/GIS/Work/Ancillary/RegionMaps/Phase5/states.tif',
-   huc8 = 'x:/LCC/GIS/Work/Ancillary/RegionMaps/Phase5/huc8.tif',
-   landcover = 'x:/LCC/GIS/Final/NER/caps_phase5/grids/dslland.tif',
-   resultpath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/',
-   states.attributes = 'x:/LCC/GIS/Work/Ancillary/Boundaries/states/states_ner.dbf',
-   huc8.attributes = 'x:/LCC/GIS/Work/Ancillary/Boundaries/watersheds/wbdhu8_neregion_130930.dbf',
-   exclude = c(300, 301, 400, 402, 404, 405, 407, 408, 409, 410, 411, 500, 502, 504, 506, 507),
-   cleanup = TRUE) {
+'prep.ecoConnect.quantiles' <- function(states = 'x:/LCC/GIS/Work/Ancillary/RegionMaps/Phase5/states.tif',
+      huc8 = 'x:/LCC/GIS/Work/Ancillary/RegionMaps/Phase5/huc8.tif',
+      landcover = 'x:/LCC/GIS/Final/NER/caps_phase5/grids/dslland.tif',
+      resultpath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/',
+      states.attributes = 'x:/LCC/GIS/Work/Ancillary/Boundaries/states/states_ner.dbf',
+      huc8.attributes = 'x:/LCC/GIS/Work/Ancillary/Boundaries/watersheds/wbdhu8_neregion_130930.dbf',
+      exclude = c(301, 400, 402, 500, 502),
+      cleanup = TRUE) {
    
    
    # prep data for ecoConnect.quantiles: make index/mask for estimating quantiles of ecoConnect
    # and looking up HUC8 watersheds and states in ecoConnect.tool.app
+   # 
    # Arguments:
-   #     states      geoTIFF of states
-   #     huc8        geoTIFF of HUC8 watersheds
-   #     landcover   DSLland geoTIFF
-   #     result      name of 
-   #     exclude     values of DSLland to exclude when calculating percentiles (marine, estaurine, and Freshwater Tidal Riverine)
+   #     states               geoTIFF of states
+   #     huc8                 geoTIFF of HUC8 watersheds
+   #     landcover            DSLland geoTIFF
+   #     resultpath           path to put final results
+   #     states.attributes    attribute table for states
+   #     huc8.attributes      attribute table for HUCs
+   #     exclude              values of DSLland to exclude when calculating percentiles (all subtidal classes)
+   #     cleanup              clean up intermediate values if TRUE
    # Results:
-   #     shindex     integer geoTIFF of states (11000) and HUC8 watersheds (00111)
-   #     stateinfo   table of state classes and state names
-   #     hucinfo     table of HUC8 classes and 8 digit HUC8 code
+   #     shindex              integer geoTIFF of states (11000) and HUC8 watersheds (00111)
+   #     stateinfo            table of state classes and state names
+   #     hucinfo              table of HUC8 classes and 8 digit HUC8 code
+   #     
    # Note: states and HUCs must be numbered 1:n
    # B. Compton, 6 Sep 2024
    

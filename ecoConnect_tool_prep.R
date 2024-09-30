@@ -4,7 +4,7 @@
    # Before running, 
    #  - run and post-process IEI 
    #  - run ECOCONNECT and rescale.ecoConnect.R
-   #  - run ecoConnect.quantiles to create shindex.TIF, stateinfo.txt, and hucinfo.txt
+   #  - run prep.ecoConnect.quantiles to create shindex.tif, stateinfo.txt, and hucinfo.txt
    # Arguments:
    #	iei			process IEI if TRUE
    #	ecoConnect	process ecoConnect if TRUE
