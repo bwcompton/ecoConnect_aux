@@ -28,13 +28,15 @@
    # Result (written to sourcepath):
    #   ecoConnect_quantiles.RDS
    #     RDS with three arrays
-   #        quantiles.full, quantiles.state, quantiles.huc
+   #        full, state, huc
    #     each with 5 dimensions
    #        1. region (full = 1, state = 14, huc = 245)
    #        2. acres (5 or 6)
    #        3. systems (4)
    #        4. all/best (2)
    #        5. percentiles (100)
+   #     and 2 tables
+   #        stateinfo and hucinfo
    #   sample_sizes_full.txt
    #   sample_sizes_state.txt
    #   sample_sizes_huc.txt
@@ -196,7 +198,9 @@
    
    # Now take percentiles and sample sizes
    for(h in 1:length(rc)) {                                                                     # For each set of regions,
-      qu <- array(NA, dim = c(rc[h], length(acres), length(layers), 2, 100))                    #    quantiles for region set
+      dn <- list(regions = 1:rc[h], acres = acres, layers = layers, 
+                 all.best = c('all', 'best'), percentile = 1:100)                               #    array names
+      qu <- array(NA, dim = c(rc[h], length(acres), length(layers), 2, 100), dimnames = dn)     #    quantiles for region set
       ss <- array(NA, dim = c(rc[h], length(acres)))                                            #    sample sizes for region set
       for(i in 1:rc[h]) {                                                                       #    For each region,
          if(h == 1)                                                                             #       Select samples that fall in region
@@ -244,7 +248,7 @@
    if(postfix != '')
       postfix <- paste0('_', postfix)
    
-   x <- list(quantiles.full = quantiles.full, quantiles.state = quantiles.state, quantiles.huc = quantiles.huc)
+   x <- list(full = quantiles.full, state = quantiles.state, huc = quantiles.huc, stateinfo = sinfo, hucinfo = hinfo)
    saveRDS(x, f <- paste0(sourcepath, 'ecoConnect_quantiles', postfix, '.RDS'))               # write quantiles to RDS
    
    write.table(samples.full, paste0(sourcepath, 'sample_sizes_full', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
