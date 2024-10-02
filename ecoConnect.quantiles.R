@@ -198,7 +198,7 @@
    
    # Now take percentiles and sample sizes
    for(h in 1:length(rc)) {                                                                     # For each set of regions,
-      dn <- list(regions = 1:rc[h], acres = format(acres), layers = layers, 
+      dn <- list(regions = 1:rc[h], acres = gsub(' ', '', format(acres)), layers = layers, 
                  all.best = c('all', 'best'), percentile = 1:100)                               #    array names
       qu <- array(NA, dim = c(rc[h], length(acres), length(layers), 2, 100), dimnames = dn)     #    quantiles for region set
       ss <- array(NA, dim = c(rc[h], length(acres)))                                            #    sample sizes for region set
