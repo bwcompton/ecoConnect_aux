@@ -14,6 +14,8 @@
    
    
    
+   library(terra)
+   
    source('x:/LCC/Code/Web/geoTIFF4web.R')
    
    iei.source.path <- 'x:/LCC/GIS/Final/NER/caps_phase5/post_2020/scaled/'
@@ -49,9 +51,16 @@
       }
    
    if(shindex) {
-      cat('\nProcessing shindex...\n', sep = '')
+      cat('\nProcessing shindex and template...\n', sep = '')
       geoTIFF4web(paste0(shindex.source.path, 'shindex.tif'), 'shindex',
                   resultpath = shindex.result.path, auto = FALSE, type = 'INT2U', overviewResample = 'nearest')
+      
+      template <- !is.na(rast(paste0(shindex.source.path, 'shindex.tif')))
+      writeRaster(template, paste0(shindex.source.path, 'template.tif'), overwrite = TRUE, datatype = 'INT1U', 
+                  NAflag = assessType('Byte')$noDataValue)
+      geoTIFF4web(paste0(shindex.source.path, 'template.tif'), 'template',
+                  resultpath = shindex.result.path, auto = FALSE, type = 'INT1U', buildOverviews = FALSE)
+      
       
       file.copy(paste0(shindex.source.path, 'hucinfo.txt'), shindex.result.path, overwrite = TRUE)
       file.copy(paste0(shindex.source.path, 'stateinfo.txt'), shindex.result.path, overwrite = TRUE)
