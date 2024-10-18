@@ -113,8 +113,13 @@
       idx
    }
    
+   'Mode' <- function(x) {                                                                      # Return first mode
+      ux <- unique(x)
+      ux[which.max(tabulate(match(x, ux)))]
+   }
+   
    'unpack' <- function(x)                                                                      # unpack state and HUC ids
-      c(floor(x / 1000), x - floor(x / 1000) * 1000)
+      list(state = floor(x / 1000), huc = x - floor(x / 1000) * 1000)
    
    
    
@@ -132,14 +137,14 @@
    
    idx <- set.up.indices(idx, n, n.factor)                                                      # set up indices; to be amended when we drop block sizes based on n.factor                                                                 
    
-     
+   
    # read source data
    shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
    lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
    sinfo <- read.table(paste0(sourcepath, 'stateinfo.txt'), sep = '\t', header = TRUE)          # we'll use these for sample size tables
    hinfo <- read.table(paste0(sourcepath, 'hucinfo.txt'), sep = '\t', header = TRUE)
    
-
+   
    # create results
    statehuc <- data.frame(matrix(NA, n, 2))
    names(statehuc) <- c('state', 'huc')            # state and HUC8 for each sample
@@ -174,8 +179,13 @@
                   }
                }
                
-               statehuc[i, ] <- unpack(sh[ceiling(idx$max.block / 2), 
-                                          ceiling(idx$max.block / 2)])                          #       get state and HUC ids
+               if(all(sh == sh[1]))                                                             #       get most common state and HUC ids
+                  statehuc[i, ] <- unpack(sh[1])
+               else {
+                  shu <- unpack(sh)
+                  statehuc[i, ] <- c(Mode(shu$state), Mode(shu$huc))
+               }
+               
                if(i %% skip == 0)                                                               #       update progress bar every nth iteration
                   pb()
             }
