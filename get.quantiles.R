@@ -26,10 +26,10 @@
    #        5. percentiles (100)
    #     and 2 tables
    #        stateinfo and hucinfo
-   #   sample_sizes_full.txt
-   #   sample_sizes_state.txt
-   #   sample_sizes_huc.txt
-   #     tables of region/state name/huc ID by acres with sample sizes
+   #   sample_sizes_full.txt, sample_sizes_final_full.txt
+   #   sample_sizes_state.txt, sample_sizes_final_state.txt
+   #   sample_sizes_huc.txt, sample_sizes_final_huc.txt
+   #     tables of region/state name/huc ID by acres with actual sample sizes and final sample sizes after sweeping
    #     
    #  realized.acres (printed to console)
    #     a conversion from nominal acres to actual acerage of pseudoparcels. Use this in make.report.percentiles when interpolating percentiles for a given parcel.
@@ -109,7 +109,7 @@
          quantiles.full <- qu
          samples.full <- data.frame(ss)
          names(samples.full) <- acres
-      },
+       },
       {
          quantiles.state <- qu
          samples.state <- data.frame(cbind(sinfo$postal[match(sinfo$class, 1:dim(sinfo)[1])]), ss)
@@ -125,6 +125,18 @@
       cat('Finished calculating quantiles for ', c('full region', 'states', 'HUC8s')[h], '.\n', sep = '')
    }
    
+   x <- sweep.quantiles(quantiles.full, samples.full)
+   quantiles.full <- x$quantiles
+   samples.full.final <- x$final.samples
+   
+   x <- sweep.quantiles(quantiles.state, samples.state)
+   quantiles.state <- x$quantiles
+   samples.state.final <- x$final.samples
+   
+   x <- sweep.quantiles(quantiles.huc, samples.huc)
+   quantiles.huc <- x$quantiles
+   samples.huc.final <- x$final.samples
+   
    
    cat('Writing results...\n')
    if(postfix != '')
@@ -136,7 +148,11 @@
    write.table(samples.full, paste0(sourcepath, 'sample_sizes_full', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
    write.table(samples.state, paste0(sourcepath, 'sample_sizes_state', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
    write.table(samples.huc, paste0(sourcepath, 'sample_sizes_huc', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
-   
+
+   write.table(samples.full.final, paste0(sourcepath, 'sample_sizes_final_full', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
+   write.table(samples.state.final, paste0(sourcepath, 'sample_sizes_final_state', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+   write.table(samples.huc.final, paste0(sourcepath, 'sample_sizes_final_huc', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
+      
    elapsed <- format(seconds_to_period(round(as.duration(interval(ts, Sys.time())), 1)))
    
    cat('Results written to ', f, '\n', sep = '')
