@@ -204,13 +204,23 @@
    if(postfix != '')
       p <- paste0('_', postfix)
    p <- paste0(p, '_', gsub('[: ]', '_', substr(now(), 1, 16)))
-   saveRDS(x, f <- paste0(sourcepath, 'ec_samples', p, '.RDS'))                           # write samples and associated variables to RDS
+   saveRDS(x, f <- paste0(sourcepath, 'ec_samples', p, '.RDS'))                                 # write samples and associated variables to RDS
    
+   fileConnect <- file(filename <- paste0(sourcepath, 'metadata', p, '.txt'))                   # write metadata file
+   x <- (paste0('Metadata for ecoConnect.quantiles run launched ', launch))
+   x <- c(x, paste0('Total time taken: ', elapsed, '\n'))
+   x <- c(x, paste0('realized.acres <- c(', paste0(round(realized.acres, 4), collapse = ', '),
+                    ') # Realized acres for interpolation\n'))
+   x <- c(x, 'Arguments:\n')
+   writeLines(x, fileConnect)
+   close(fileConnect)
+   
+   sink(filename, append = TRUE)
+   print(call.args)
+   sink()
    
    cat('Results written to ', f, '. To finish off, run\n\n', sep = '')
    cat('   get.quantiles(\'', sourcepath, '\', \'', postfix, '\')\n\n', sep = '')
    cat('This will gather samples from all sample files in ', sourcepath, '*', postfix, '.RDS\n', sep = '')
    cat('Total time taken: ', elapsed, '\n', sep = '')
-   
-   
 }
