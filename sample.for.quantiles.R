@@ -1,7 +1,9 @@
-'ecoConnect.quantiles' <- function(n = 1e8, n.factor = c(1, 1, 1, 1, 1e2, 1e3, 1e4), acres  = c(1, 10, 100, 1000, 1e4, 1e5, 1e6), 
+'sample.for.quantiles' <- function(n = 1e8, n.factor = c(1, 1, 1, 1, 1e2, 1e3, 1e4), acres  = c(1, 10, 100, 1000, 1e4, 1e5, 1e6), 
                                    best.pct = 0.5, layers = c('forests', 'ridgetops', 'wetlands', 'floodplains' ), 
                                    server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
-                                   sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
+                                   #                                   sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
+                                   sourcepath = 'c:/gis/lcc/ecoConnect_final/', postfix = '', 
+                                   
                                    threshold = 0.25) {
    
    
@@ -22,8 +24,6 @@
    #   
    # Source data (in sourcepath):
    #   shindex.tif         index grid for states and HUC8s, with nodata for all cells that should be masked out (marine, estaurine, freshwater tidal)
-   #   stateinfo           table of state classes and state names
-   #   hucinfo             table of HUC8 classes and 8 digit HUC8 code
    #
    # Result (written to sourcepath):
    #   ecoConnect_quantiles.RDS
@@ -54,6 +54,7 @@
    #    - this revised version keeps rasters in memory for a big speedup, but it's a memory hog--you'll need >> 64 GB
    # 
    # B. Compton, 12 Sep 2024 (from ecoConnect.big.quantiles)
+   # 18 Oct 2024: split into sample.for.quantiles and get.quantiles from ecoConnect.quantiles
    
    
    
@@ -64,8 +65,8 @@
    library(lubridate)
    library(progressr)
    
-   launch <- now()
-   ts <- Sys.time()
+   # launch <- now()
+   # ts <- Sys.time()
    
    
    handlers(global = TRUE)                                                                      # for progress bar
@@ -141,8 +142,6 @@
    # read source data
    shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
    lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
-   sinfo <- read.table(paste0(sourcepath, 'stateinfo.txt'), sep = '\t', header = TRUE)          # we'll use these for sample size tables
-   hinfo <- read.table(paste0(sourcepath, 'hucinfo.txt'), sep = '\t', header = TRUE)
    
    
    # create results
@@ -179,7 +178,7 @@
                   }
                }
                
-               if(all(sh == sh[1]))                                                             #       get most common state and HUC ids
+               if(all(sh == sh[1], na.rm = TRUE))                                               #       get most common state and HUC ids
                   statehuc[i, ] <- unpack(sh[1])
                else {
                   shu <- unpack(sh)
@@ -198,76 +197,16 @@
    
    
    
-   # Intermediate result z is 4d array of row x acres x systems x all/best
-   # Result quantiles.* are 5d arrays of region x acres x systems x all/best x 100 with percentiles
-   # Result samples.* are 2d arrays of region x acres with sample sizes
-   
-   cat('Calculating percentiles...\n')
-   rc <- c(1, max(sinfo$class), max(hinfo$class))                                               # number of classes in each region (1 for full, 14 states, 245 HUCs)
-   
-   
-   # Now take percentiles and sample sizes
-   for(h in 1:length(rc)) {                                                                     # For each set of regions,
-      dn <- list(regions = 1:rc[h], acres = gsub(' ', '', format(acres)), layers = layers, 
-                 all.best = c('all', 'best'), percentile = 1:100)                               #    array names
-      qu <- array(NA, dim = c(rc[h], length(acres), length(layers), 2, 100), dimnames = dn)     #    quantiles for region set
-      ss <- array(NA, dim = c(rc[h], length(acres)))                                            #    sample sizes for region set
-      for(i in 1:rc[h]) {                                                                       #    For each region,
-         if(h == 1)                                                                             #       Select samples that fall in region
-            y <- z
-         else {
-            if(!i %in% statehuc[, h - 1])                                                       #       just to be safe, though all states and HUCs should be represented
-               next
-            y <- z[statehuc[, h - 1] == i, , , , drop = FALSE]
-         }
-         for(j in 1:dim(y)[2]) {                                                                #       For each block size (we might not have all acerages),
-            ss[i, j] <- sum(!is.na(y[ , j, 1, 1]))                                              #          collect sample sizes (identical across systems and all/best)
-            for(k in 1:length(layers)) {                                                        #          For each layer,
-               for(l in 1:2) {                                                                  #             For all/best,   
-                  qu[i, j, k, l, ] <- quantile(y[, j, k, l], 
-                                               prob = seq(0.01, 1, by = 0.01),  
-                                               na.rm = TRUE, names = FALSE)                     #                take percentiles
-               } 
-            }  
-         }
-      }
-      
-      ss[is.na(ss)] <- 0
-      switch(h, {                                                                               # save results to appropriate region variable
-         quantiles.full <- qu
-         samples.full <- data.frame(ss)
-         names(samples.full) <- acres
-      },
-      {
-         quantiles.state <- qu
-         samples.state <- data.frame(cbind(sinfo$postal[match(sinfo$class, 1:dim(sinfo)[1])]), ss)
-         names(samples.state) <- c('Postal', acres)
-      },
-      {
-         quantiles.huc <- qu
-         samples.huc <- data.frame(cbind(hinfo$HUC8_code[match(hinfo$class, 1:dim(hinfo)[1])]), ss)
-         names(samples.huc) <- c('HUC8_code', acres)
-         
-      })
-      
-      cat('Finished calculating quantiles for ', c('full region', 'states', 'HUC8s')[h], '.\n', sep = '')
-   }
-   
-   
-   cat('Writing results...\n')
-   if(postfix != '')
-      postfix <- paste0('_', postfix)
-   
-   x <- list(full = quantiles.full, state = quantiles.state, huc = quantiles.huc, stateinfo = sinfo, hucinfo = hinfo)
-   saveRDS(x, f <- paste0(sourcepath, 'ecoConnect_quantiles', postfix, '.RDS'))               # write quantiles to RDS
-   
-   write.table(samples.full, paste0(sourcepath, 'sample_sizes_full', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)          # write sample size text files
-   write.table(samples.state, paste0(sourcepath, 'sample_sizes_state', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
-   write.table(samples.huc, paste0(sourcepath, 'sample_sizes_huc', postfix, '.txt'), sep = '\t', row.names = FALSE, quote = FALSE)
-   
    elapsed <- format(seconds_to_period(round(as.duration(interval(ts, Sys.time())))))
    
-   fileConnect <- file(filename <- paste0(sourcepath, 'metadata', postfix, '.txt'))            # write metadata file
+   # Save intermediate results z, statehuc, acres, layers 
+   x <- list(samples = z, statehuc = statehuc, acres = acres, layers = layers, realized.acres = realized.acres)
+   if(postfix != '')
+      p <- paste0('_', postfix)
+   p <- paste0(p, '_', gsub('[: ]', '_', substr(now(), 1, 16)))
+   saveRDS(x, f <- paste0(sourcepath, 'ec_samples', p, '.RDS'))                                 # write samples and associated variables to RDS
+   
+   fileConnect <- file(filename <- paste0(sourcepath, 'metadata', p, '.txt'))                   # write metadata file
    x <- (paste0('Metadata for ecoConnect.quantiles run launched ', launch))
    x <- c(x, paste0('Total time taken: ', elapsed, '\n'))
    x <- c(x, paste0('realized.acres <- c(', paste0(round(realized.acres, 4), collapse = ', '),
@@ -280,6 +219,8 @@
    print(call.args)
    sink()
    
-   cat('Results written to ', sourcepath, '*', postfix, '.*\n', sep = '')
+   cat('Results written to ', f, '. To finish off, run\n\n', sep = '')
+   cat('   get.quantiles(\'', sourcepath, '\', \'', postfix, '\')\n\n', sep = '')
+   cat('This will gather samples from all sample files in ', sourcepath, '*', postfix, '.RDS\n', sep = '')
    cat('Total time taken: ', elapsed, '\n', sep = '')
 }
