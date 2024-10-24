@@ -53,13 +53,12 @@
    for(i in 1:length(files)) {
       cat(paste0('Reading ',sourcepath, files[i], '...\n'))
       x <- readRDS(paste0(sourcepath, files[i]))
-      x$samples <- x$z   ############################# very very temporary because I changed the name and have already run several
       if(i == 1) {
          z <- x$samples
          statehuc <- x$statehuc
          acres <- x$acres
          layers <- x$layers
-         realized.acres <- acres  ###########  realized.acres <- x$realized.acres
+         realized.acres <- x$realized.acres 
       }
       else {
          z <- abind(z, x$samples, along = 1)
@@ -93,7 +92,7 @@
             y <- z[statehuc[, h - 1] == i, , , , drop = FALSE]
          }
          for(j in 1:dim(y)[2]) {                                                                #       For each block size (we might not have all acerages),
-            ss[i, j] <- sum(!is.na(y[ , j, 1, 1]))                                              #          collect sample sizes (identical across systems and all/best)
+            ss[i, j] <- sum(!is.na(y[, j, 1, 1]))                                               #          collect sample sizes (identical across systems and all/best)
             for(k in 1:length(layers)) {                                                        #          For each layer,
                for(l in 1:2) {                                                                  #             For all/best,   
                   qu[i, j, k, l, ] <- quantile(y[, j, k, l], 

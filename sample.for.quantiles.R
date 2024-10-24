@@ -147,7 +147,7 @@
    # create results
    statehuc <- data.frame(matrix(NA, n, 2))
    names(statehuc) <- c('state', 'huc')            # state and HUC8 for each sample
-   z <- array(NA, dim = c(n, length(idx$w), length(layers), 2))                                 # row x acres x systems x all/best
+   z <- array(NA, dim = c(n, length(acres), length(layers), 2))                                 # row x acres x systems x all/best
    cat('Gathering ', format(n, scientific = FALSE, big.mark = ','), ' samples...\n', sep = '')
    
    # gather samples
@@ -218,6 +218,16 @@
    sink(filename, append = TRUE)
    print(call.args)
    sink()
+   
+   z<<-z
+   ss <- rep(NA, length(acres))
+   for(j in 1:length(acres)) 
+      ss[j] <- sum(!is.na(z[, j, 1, 1]))
+   names(ss) <- acres
+   cat('\nSample sizes:\n')
+   print(ss)
+   cat('\n')
+   
    
    cat('Results written to ', f, '. To finish off, run\n\n', sep = '')
    cat('   get.quantiles(\'', sourcepath, '\', \'', postfix, '\')\n\n', sep = '')
