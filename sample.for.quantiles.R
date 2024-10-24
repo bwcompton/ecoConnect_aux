@@ -1,9 +1,8 @@
 'sample.for.quantiles' <- function(n = 1e8, n.factor = c(1, 1, 1, 1, 1e2, 1e3, 1e4), acres  = c(1, 10, 100, 1000, 1e4, 1e5, 1e6), 
                                    best.pct = 0.5, layers = c('forests', 'ridgetops', 'wetlands', 'floodplains' ), 
                                    server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
-                                   #                                   sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
-                                   sourcepath = 'c:/gis/lcc/ecoConnect_final/', postfix = '', 
-                                   
+                                   sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
+                                   # sourcepath = 'c:/gis/lcc/ecoConnect_final/', postfix = '', 
                                    threshold = 0.25) {
    
    
@@ -64,9 +63,10 @@
    library(terra)
    library(lubridate)
    library(progressr)
+   library(collapse)
    
-   # launch <- now()
-   # ts <- Sys.time()
+   launch <- now()
+   ts <- Sys.time()
    
    
    handlers(global = TRUE)                                                                      # for progress bar
@@ -114,11 +114,6 @@
       idx
    }
    
-   'Mode' <- function(x) {                                                                      # Return first mode
-      ux <- unique(x)
-      ux[which.max(tabulate(match(x, ux)))]
-   }
-   
    'unpack' <- function(x)                                                                      # unpack state and HUC ids
       list(state = floor(x / 1000), huc = x - floor(x / 1000) * 1000)
    
@@ -140,8 +135,13 @@
    
    
    # read source data
-   shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
-   lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
+   # shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
+   # lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
+   # saved <<- list(shindex = shindex, lays = lays); return()                ############ TEMP TO SPEED UP TESTING
+
+   shindex <- saved$shindex
+   lays <- saved$lays
+   
    
    
    # create results
@@ -182,7 +182,7 @@
                   statehuc[i, ] <- unpack(sh[1])
                else {
                   shu <- unpack(sh)
-                  statehuc[i, ] <- c(Mode(shu$state), Mode(shu$huc))
+                  statehuc[i, ] <- c(fmode(shu$state, na.rm = TRUE), fmode(shu$huc, na.rm = TRUE))
                }
                
                if(i %% skip == 0)                                                               #       update progress bar every nth iteration

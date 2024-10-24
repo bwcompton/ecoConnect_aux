@@ -57,6 +57,11 @@
    
    
    
+   
+   OBSOLETE # use sample.for.quantiles and get.quantiles
+   
+   
+   
    call.args <- as.list(environment())
    
    

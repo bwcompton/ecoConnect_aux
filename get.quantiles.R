@@ -1,4 +1,4 @@
-'get.quantiles' <- function(sourcepath = 'c:/gis/lcc/ecoConnect_final/', postfix) {
+'get.quantiles' <- function(sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix) {
    
    # Process samples from one or more sample.for.quantiles runs
    # Arguments:
