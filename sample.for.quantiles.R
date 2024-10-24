@@ -115,7 +115,7 @@
    }
    
    'unpack' <- function(x)                                                                      # unpack state and HUC ids
-      list(state = floor(x / 1000), huc = x - floor(x / 1000) * 1000)
+      list(state = as.vector(floor(x / 1000)), huc = as.vector(x - floor(x / 1000) * 1000))
    
    
    
@@ -173,7 +173,7 @@
                      y <- lay.vals[[k]][idx$block.indices[[j]], idx$block.indices[[j]]]         #                pull out subblock
                      y[is.na(sh[idx$block.indices[[j]], idx$block.indices[[j]]])] <- NA         #                mask from shindex
                      z[i, j, k, 1] <- mean(y, na.rm = TRUE)                                     #                sample all values
-                     z[i, j, k, 2] <- mean(y[y >= fnth(y, n = best.pct, na.rm = TRUE)],
+                     z[i, j, k, 2] <- mean(y[y >= fnth(as.vector(y), n = best.pct, na.rm = TRUE)],
                                            na.rm = TRUE)                                        #                sample top best.pct
                   }
                }
