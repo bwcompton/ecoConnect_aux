@@ -71,7 +71,7 @@
    
    handlers(global = TRUE)                                                                      # for progress bar
    handlers('rstudio')
-   skip <- 100                                                                                   # report progress every skipth iteration
+   skip <- 100                                                                                  # report progress every skipth iteration
    pb <- progressor(n / skip)
    
    if(!all(acres == sort(acres)))
@@ -90,14 +90,15 @@
    
    'index.block' <- function(x, s, indices = 0) {                                               # Index block of a matrix allowing indices beyond edges
       i <- list(s[1] + indices, s[2] + indices)                                                 #    row and column indices
-      z <- x[pmin(pmax(i[[1]], 1), dim(x)[1]), pmin(pmax(i[[2]], 1), dim(x)[2]), drop = FALSE]                #    push indices beyond edges to 1st/last row/column
-      z[(i[[1]] < 1) | (i[[1]] > dim(x)[1]), ] <- NA                                              #    now set rows and columns beyond edges to NA
+      z <- x[pmin(pmax(i[[1]], 1), dim(x)[1]), pmin(pmax(i[[2]], 1), dim(x)[2]), drop = FALSE]  #    push indices beyond edges to 1st/last row/column
+      z[(i[[1]] < 1) | (i[[1]] > dim(x)[1]), ] <- NA                                            #    now set rows and columns beyond edges to NA
       z[, (i[[2]] < 1) | (i[[2]] > dim(x)[2])] <- NA
       z
    }
    
    'set.up.indices' <- function(idx, n, n.factor, i = 1) {                                      # Select block indices for current acerages; recall when dropping block sizes due to n.factor
-      b <- i <= n / n.factor                                                                    #    block sizes we're still doing
+ cat('set.up.indices\n')
+           b <- i <= n / n.factor                                                                    #    block sizes we're still doing
       if(!any(b)) 
          return(NULL)
       idx$acres <- idx$acres[b]                                                                 #    select all of these to current block sizes
@@ -105,7 +106,7 @@
       idx$thresholds <- idx$thresholds[b]
       idx$rel.indices <- idx$rel.indices[b]
       idx$n <- idx$n[b]
-      idx$n.factor <- idx$n.factor[b] 
+      idx$n.factor <- n.factor[b] 
       
       idx$max.block <- max(idx$w)                                                               #    maximum block size - this is what we'll always read
       idx$block.idx <- idx$rel.indices[[length(idx$rel.indices)]]                               #    relative indices for full block (we'll use this inside loop)
@@ -135,8 +136,8 @@
    
    
    # read source data
-   # shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
-   # lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
+   # shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                     # combined state/HUC8 index and mask
+   # lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif'))) # ecoConnect layers
    # saved <<- list(shindex = shindex, lays = lays); return()                ############ TEMP TO SPEED UP TESTING
 
    shindex <- saved$shindex
@@ -191,8 +192,10 @@
          }
       }
       if(i >= idx$next.drop)                                                                    #    if it's time to drop samples,
+      {cat('Dropping samples, i = ', i, ', idx$next.drop = ', id$next.drop, '\n', sep = '')
          if(is.null(idx <- set.up.indices(idx, n, n.factor, i + 1)))                            #       drop 'em
             break
+      }
    }
    
    
