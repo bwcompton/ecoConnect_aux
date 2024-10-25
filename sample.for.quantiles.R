@@ -92,7 +92,7 @@
       z
    }
    
-   'index.block' <- function(x, s, indices = 0, pad) {                                          # Index block of a matrix allowing indices beyond edges, assuming padding
+   'index.block' <- function(x, s, indices = 0, pad = 1) {                                      # Index block of a matrix allowing indices beyond edges, assuming padding
       x[s[1] + pad + indices, s[2] + pad + indices]
    }
    
@@ -157,7 +157,7 @@
       success <- FALSE
       while(!success) {                                                                         #    until we find a live one,
          s <- round(runif(2) * dim(shindex)[1:2])                                               #    index of sample
-         if(!is.na(index.block(shindex, s, 0, pad))) {                                          #    if focal cell has data,
+         if(!is.na(index.block(shindex, s, 0))) {                                               #    if focal cell has data,
             sh <- index.block(shindex, s, idx$block.idx, pad)                                   #       read shindex for block
             if(any(!is.na(sh))) {                                                               #       If there are any data, continue
                got.layers <- FALSE
