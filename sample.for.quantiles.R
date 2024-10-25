@@ -195,7 +195,7 @@
       }
    }
    
-   
+    
    
    elapsed <- format(seconds_to_period(round(as.duration(interval(ts, Sys.time())))))
    
