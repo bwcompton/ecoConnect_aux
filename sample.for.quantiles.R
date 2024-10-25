@@ -92,11 +92,11 @@
       z
    }
    
-   'index.block' <- function(x, s, indices = 0, pad = 1) {                                      # Index block of a matrix allowing indices beyond edges, assuming padding
-      x[s[1] + pad + indices, s[2] + pad + indices]
+   'index.block' <- function(x, s, indices = 0) {                                               # Index block of a matrix allowing indices beyond edges
+      x[s[1] + indices, s[2] + indices]
    }
    
-   'set.up.indices' <- function(idx, n, n.factor, i = 1) {                                      # Select block indices for current acerages; recall when dropping block sizes due to n.factor
+   'set.up.indices' <- function(idx, n, n.factor, i = 1, pad) {                                 # Select block indices for current acerages; recall when dropping block sizes due to n.factor
       b <- i <= n / n.factor                                                                    #    block sizes we're still doing
       if(!any(b)) 
          return(NULL)
@@ -108,7 +108,7 @@
       idx$n.factor <- n.factor[b] 
       
       idx$max.block <- max(idx$w)                                                               #    maximum block size - this is what we'll always read
-      idx$block.idx <- idx$rel.indices[[length(idx$rel.indices)]]                               #    relative indices for full block (we'll use this inside loop)
+      idx$block.idx <- idx$rel.indices[[length(idx$rel.indices)]] + pad                         #    relative indices for full block (we'll use this inside loop)
       idx$block.indices <- lapply(idx$rel.indices, function(x) x + ceiling(idx$max.block / 2))  #    indices for each block size, absolute for max block 
       idx$next.drop <- min(idx$n / idx$n.factor)                                                #    we'll revisit this when we reach this iteration
       idx
@@ -131,8 +131,8 @@
    idx$n <- rep(n, length(acres))
    idx$n.factor <- n.factor
    
-   idx <- set.up.indices(idx, n, n.factor)                                                      # set up indices; to be amended when we drop block sizes based on n.factor                                                                 
    pad <- floor(max(idx$w) / 2)                                                                 # this is how much we'll pad matrices
+   idx <- set.up.indices(idx, n, n.factor, pad)                                                 # set up indices; to be amended when we drop block sizes based on n.factor                                                                 
    
    
    # read source data
@@ -157,7 +157,7 @@
       while(!success) {                                                                         #    until we find a live one,
          s <- round(runif(2) * gridsize)                                                        #    index of sample
          if(!is.na(index.block(shindex, s, 0))) {                                               #    if focal cell has data,
-            sh <- index.block(shindex, s, idx$block.idx, pad)                                   #       read shindex for block
+            sh <- index.block(shindex, s, idx$block.idx)                                        #       read shindex for block
             if(any(!is.na(sh))) {                                                               #       If there are any data, continue
                got.layers <- FALSE
                for(j in 1:length(idx$acres)) {                                                  #          for each block size,
@@ -165,7 +165,7 @@
                      idx$thresholds[j])                                                         #          bail if too many missing cells   
                      next
                   if(!got.layers) {                                                             #                if we don't have data yet,
-                     lay.vals <- lapply(lays, function(x) index.block(x, s, idx$block.idx, pad))#                   read current block of all 4 ecoConnect layers as matrices
+                     lay.vals <- lapply(lays, function(x) index.block(x, s, idx$block.idx))     #                   read current block of all 4 ecoConnect layers as matrices
                      got.layers <- TRUE
                      success <- TRUE
                   }
@@ -188,7 +188,7 @@
          }
       }
       if(i >= idx$next.drop)                                                                    #    if it's time to drop samples,
-         if(is.null(idx <- set.up.indices(idx, n, n.factor, i + 1)))                            #       drop 'em
+         if(is.null(idx <- set.up.indices(idx, n, n.factor, i + 1, pad)))                       #       drop 'em
             break
    }
    
