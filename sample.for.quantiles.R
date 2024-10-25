@@ -166,7 +166,7 @@
                      idx$thresholds[j])                                                         #          bail if too many missing cells   
                      next
                   if(!got.layers) {                                                             #                if we don't have data yet,
-                     lay.vals <- lapply(lays, function(x) index.block(x, s, idx$block.idx), pad)#                   read current block of all 4 ecoConnect layers as matrices
+                     lay.vals <- lapply(lays, function(x) index.block(x, s, idx$block.idx, pad))#                   read current block of all 4 ecoConnect layers as matrices
                      got.layers <- TRUE
                      success <- TRUE
                   }
