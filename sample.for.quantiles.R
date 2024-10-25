@@ -132,7 +132,7 @@
    idx$n.factor <- n.factor
    
    pad <- floor(max(idx$w) / 2)                                                                 # this is how much we'll pad matrices
-   idx <- set.up.indices(idx, n, n.factor, pad)                                                 # set up indices; to be amended when we drop block sizes based on n.factor                                                                 
+   idx <- set.up.indices(idx, n, n.factor, pad = pad)                                           # set up indices; to be amended when we drop block sizes based on n.factor                                                                 
    
    
    # read source data
