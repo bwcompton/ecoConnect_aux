@@ -92,7 +92,7 @@
       z
    }
    
-   'index.block' <- function(x, s) {                                                            # Index block of a matrix allowing indices beyond edges
+   'index.block' <- function(x, s, indices) {                                                   # Index block of a matrix allowing indices beyond edges
       x[s[1] + indices, s[2] + indices]
    }
    
