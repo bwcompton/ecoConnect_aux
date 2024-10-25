@@ -189,7 +189,7 @@
          }
       }
       if(i >= idx$next.drop)                                                                    #    if it's time to drop samples,
-      {cat('Dropping samples, i = ', i, ', idx$next.drop = ', id$next.drop, '\n', sep = '')
+      {cat('Dropping samples, i = ', i, ', idx$next.drop = ', idx$next.drop, '\n', sep = '')
          if(is.null(idx <- set.up.indices(idx, n, n.factor, i + 1)))                            #       drop 'em
             break
       }
