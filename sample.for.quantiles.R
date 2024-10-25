@@ -143,7 +143,7 @@
    
    shindex <- saved$shindex
    lays <- saved$lays
-   
+   gridsize <- dim(shindex)[1:2] - pad * 2                                                      # unpadded grid size
    
    
    # create results
@@ -156,7 +156,7 @@
    for(i in 1:n) {                                                                              # For each sample,
       success <- FALSE
       while(!success) {                                                                         #    until we find a live one,
-         s <- round(runif(2) * dim(shindex)[1:2])                                               #    index of sample
+         s <- round(runif(2) * gridsize)                                                        #    index of sample
          if(!is.na(index.block(shindex, s, 0))) {                                               #    if focal cell has data,
             sh <- index.block(shindex, s, idx$block.idx, pad)                                   #       read shindex for block
             if(any(!is.na(sh))) {                                                               #       If there are any data, continue
