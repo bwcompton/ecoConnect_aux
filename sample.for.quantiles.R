@@ -97,7 +97,6 @@
    }
    
    'set.up.indices' <- function(idx, n, n.factor, i = 1) {                                      # Select block indices for current acerages; recall when dropping block sizes due to n.factor
-      cat('set.up.indices\n')
       b <- i <= n / n.factor                                                                    #    block sizes we're still doing
       if(!any(b)) 
          return(NULL)
@@ -134,7 +133,7 @@
    
    idx <- set.up.indices(idx, n, n.factor)                                                      # set up indices; to be amended when we drop block sizes based on n.factor                                                                 
    pad <- floor(max(idx$w) / 2)                                                                 # this is how much we'll pad matrices
-      
+   
    
    # read source data
    # shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'), pad)                               # combined state/HUC8 index and mask
@@ -189,13 +188,11 @@
          }
       }
       if(i >= idx$next.drop)                                                                    #    if it's time to drop samples,
-      {cat('Dropping samples, i = ', i, ', idx$next.drop = ', idx$next.drop, '\n', sep = '')
          if(is.null(idx <- set.up.indices(idx, n, n.factor, i + 1)))                            #       drop 'em
             break
-      }
    }
    
-    
+   
    
    elapsed <- format(seconds_to_period(round(as.duration(interval(ts, Sys.time())))))
    
