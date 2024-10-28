@@ -3,7 +3,7 @@
                                    server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
                                    sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
                                    # sourcepath = 'c:/gis/lcc/ecoConnect_final/', postfix = '', 
-                                   threshold = 0.25) {
+                                   threshold = 0.25, testing.all = TRUE) {
    
    
    # Calculate percentiles of simulated parcels of ecoConnect layers and save files for ecoConnect.tool
@@ -90,10 +90,17 @@
    
    'index.block' <- function(x, s, indices = 0) {                                               # Index block of a matrix allowing indices beyond edges
       i <- list(s[1] + indices, s[2] + indices)                                                 #    row and column indices
-      z <- x[pmin(pmax(i[[1]], 1), dim(x)[1]), pmin(pmax(i[[2]], 1), dim(x)[2]), drop = FALSE]                #    push indices beyond edges to 1st/last row/column
-      z[(i[[1]] < 1) | (i[[1]] > dim(x)[1]), ] <- NA                                              #    now set rows and columns beyond edges to NA
-      z[, (i[[2]] < 1) | (i[[2]] > dim(x)[2])] <- NA
-      z
+      
+      if(any(i[[1]] < 1))                                                                       #    a rather ugly series of out of bounds checks, intended to be fast
+         i[[1]] <- i[[1]][i[[1]] >= 1]
+      if(any(i[[2]] < 1))
+         i[[2]] <- i[[2]][i[[2]] >= 1]
+      if(any(i[[1]] > dim(x)[1]))
+         i[[1]] <- i[[1]][i[[1]] <= dim(x)[1]]
+      if(any(i[[2]] > dim(x)[2]))
+         i[[2]] <- i[[2]][i[[2]] <= dim(x)[2]]
+      
+      x[i[[1]], i[[2]]]
    }
    
    'set.up.indices' <- function(idx, n, n.factor, i = 1) {                                      # Select block indices for current acerages; recall when dropping block sizes due to n.factor
@@ -138,7 +145,7 @@
    # shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
    # lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
    # saved <<- list(shindex = shindex, lays = lays); return()                ############ TEMP TO SPEED UP TESTING
-
+   
    shindex <- saved$shindex
    lays <- saved$lays
    
@@ -178,9 +185,16 @@
                   }
                }
                
-               if(all(sh == sh[1], na.rm = TRUE))                                               #       get most common state and HUC ids
-                  statehuc[i, ] <- unpack(sh[1])
-               else {
+               if(testing.all) {
+                  if(all(sh == sh[1], na.rm = TRUE))                                               #       get most common state and HUC ids    ##### temp version with a switch for speed tests
+                     statehuc[i, ] <- unpack(sh[1])
+                  else {
+                     shu <- unpack(sh)
+                     statehuc[i, ] <- c(fmode(shu$state, na.rm = TRUE), fmode(shu$huc, na.rm = TRUE))
+                  }
+               }
+               else
+               {
                   shu <- unpack(sh)
                   statehuc[i, ] <- c(fmode(shu$state, na.rm = TRUE), fmode(shu$huc, na.rm = TRUE))
                }
@@ -219,8 +233,9 @@
    print(call.args)
    sink()
    
-   z<<-z
-   ss <- rep(NA, length(acres))
+   z<<-z ##################### temp for testing
+   
+   ss <- rep(NA, length(acres))                                                                 # print sample sizes
    for(j in 1:length(acres)) 
       ss[j] <- sum(!is.na(z[, j, 1, 1]))
    names(ss) <- acres
