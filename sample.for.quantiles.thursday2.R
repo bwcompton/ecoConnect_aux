@@ -1,4 +1,4 @@
-'sample.for.quantiles.thursday' <- function(n = 1e8, n.factor = c(1, 1, 1, 1, 1e2, 1e3, 1e4), acres  = c(1, 10, 100, 1000, 1e4, 1e5, 1e6), 
+'sample.for.quantiles.thursday2' <- function(n = 1e8, n.factor = c(1, 1, 1, 1, 1e2, 1e3, 1e4), acres  = c(1, 10, 100, 1000, 1e4, 1e5, 1e6), 
                                    best.pct = 0.5, layers = c('forests', 'ridgetops', 'wetlands', 'floodplains' ), 
                                    server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
                                    sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
@@ -138,7 +138,7 @@
    # shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
    # lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
    # saved <<- list(shindex = shindex, lays = lays); return()                ############ TEMP TO SPEED UP TESTING
-
+   
    shindex <- saved$shindex
    lays <- saved$lays
    
@@ -147,7 +147,7 @@
    # create results
    statehuc <- data.frame(matrix(NA, n, 2))
    names(statehuc) <- c('state', 'huc')            # state and HUC8 for each sample
-   z <- array(NA, dim = c(n, length(acres), length(layers), 2))                                 # row x acres x systems x all/best
+   z <- array(NA, dim = c(n, length(idx$w), length(layers), 2))                                 # row x acres x systems x all/best
    cat('Gathering ', format(n, scientific = FALSE, big.mark = ','), ' samples...\n', sep = '')
    
    # gather samples
@@ -218,16 +218,6 @@
    sink(filename, append = TRUE)
    print(call.args)
    sink()
-   
-   z<<-z
-   ss <- rep(NA, length(acres))
-   for(j in 1:length(acres)) 
-      ss[j] <- sum(!is.na(z[, j, 1, 1]))
-   names(ss) <- acres
-   cat('\nSample sizes:\n')
-   print(ss)
-   cat('\n')
-   
    
    cat('Results written to ', f, '. To finish off, run\n\n', sep = '')
    cat('   get.quantiles(\'', sourcepath, '\', \'', postfix, '\')\n\n', sep = '')
