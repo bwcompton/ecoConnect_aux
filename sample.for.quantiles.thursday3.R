@@ -1,9 +1,9 @@
-'sample.for.quantiles.thursday3' <- function(n = 1e8, n.factor = c(1, 1, 1, 1, 1e2, 1e3, 1e4), acres  = c(1, 10, 100, 1000, 1e4, 1e5, 1e6), 
-                                   best.pct = 0.5, layers = c('forests', 'ridgetops', 'wetlands', 'floodplains' ), 
-                                   server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
-                                   sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
-                                   # sourcepath = 'c:/gis/lcc/ecoConnect_final/', postfix = '', 
-                                   threshold = 0.25) {
+'sample.for.quantiles.3' <- function(n = 1e8, n.factor = c(1, 1, 1, 1, 1e2, 1e3, 1e4), acres  = c(1, 10, 100, 1000, 1e4, 1e5, 1e6), 
+                                     best.pct = 0.5, layers = c('forests', 'ridgetops', 'wetlands', 'floodplains' ), 
+                                     server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
+                                     sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
+                                     # sourcepath = 'c:/gis/lcc/ecoConnect_final/', postfix = '', 
+                                     threshold = 0.25) {
    
    
    # Calculate percentiles of simulated parcels of ecoConnect layers and save files for ecoConnect.tool
@@ -71,7 +71,7 @@
    
    handlers(global = TRUE)                                                                      # for progress bar
    handlers('rstudio')
-   skip <- 100                                                                                   # report progress every skipth iteration
+   skip <- 100                                                                                  # report progress every skipth iteration
    pb <- progressor(n / skip)
    
    if(!all(acres == sort(acres)))
@@ -82,21 +82,21 @@
       stop('n.factor and acres must correspond')
    
    
-   'read.tiff' <- function(x) {                                                                 # Read an entire geoTIFF into memory as a matrix
+   'read.tiff' <- function(x, pad) {                                                            # Read an entire geoTIFF into memory as a matrix, padding by pad cells
       cat('Reading ', x, '...\n', sep = '')
       z <- rast(x)
-      matrix(z, dim(z)[1], dim(z)[2], byrow = TRUE)
-   }
-   
-   'index.block' <- function(x, s, indices = 0) {                                               # Index block of a matrix allowing indices beyond edges
-      i <- list(s[1] + indices, s[2] + indices)                                                 #    row and column indices
-      z <- x[pmin(pmax(i[[1]], 1), dim(x)[1]), pmin(pmax(i[[2]], 1), dim(x)[2]), drop = FALSE]                #    push indices beyond edges to 1st/last row/column
-      z[(i[[1]] < 1) | (i[[1]] > dim(x)[1]), ] <- NA                                              #    now set rows and columns beyond edges to NA
-      z[, (i[[2]] < 1) | (i[[2]] > dim(x)[2])] <- NA
+      z <- matrix(z, dim(z)[1], dim(z)[2], byrow = TRUE)
+      pr <- matrix(NA, pad, dim(z)[2])
+      pc <- matrix(NA, dim(z)[1] + pad * 2, pad)
+      z <- cbind(pc, rbind(pr, z, pr), pc)
       z
    }
    
-   'set.up.indices' <- function(idx, n, n.factor, i = 1) {                                      # Select block indices for current acerages; recall when dropping block sizes due to n.factor
+   'index.block' <- function(x, s, indices) {                                                   # Index block of a matrix allowing indices beyond edges
+      x[s[1] + indices, s[2] + indices]
+   }
+   
+   'set.up.indices' <- function(idx, n, n.factor, i = 1, pad) {                                 # Select block indices for current acerages; recall when dropping block sizes due to n.factor
       b <- i <= n / n.factor                                                                    #    block sizes we're still doing
       if(!any(b)) 
          return(NULL)
@@ -105,10 +105,10 @@
       idx$thresholds <- idx$thresholds[b]
       idx$rel.indices <- idx$rel.indices[b]
       idx$n <- idx$n[b]
-      idx$n.factor <- idx$n.factor[b] 
+      idx$n.factor <- n.factor[b] 
       
       idx$max.block <- max(idx$w)                                                               #    maximum block size - this is what we'll always read
-      idx$block.idx <- idx$rel.indices[[length(idx$rel.indices)]]                               #    relative indices for full block (we'll use this inside loop)
+      idx$block.idx <- idx$rel.indices[[length(idx$rel.indices)]] + pad                         #    relative indices for full block (we'll use this inside loop)
       idx$block.indices <- lapply(idx$rel.indices, function(x) x + ceiling(idx$max.block / 2))  #    indices for each block size, absolute for max block 
       idx$next.drop <- min(idx$n / idx$n.factor)                                                #    we'll revisit this when we reach this iteration
       idx
@@ -131,32 +131,33 @@
    idx$n <- rep(n, length(acres))
    idx$n.factor <- n.factor
    
-   idx <- set.up.indices(idx, n, n.factor)                                                      # set up indices; to be amended when we drop block sizes based on n.factor                                                                 
+   pad <- floor(max(idx$w) / 2)                                                                 # this is how much we'll pad matrices
+   idx <- set.up.indices(idx, n, n.factor, pad = pad)                                           # set up indices; to be amended when we drop block sizes based on n.factor                                                                 
    
    
    # read source data
-   # shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
-   # lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
+   # shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'), pad)                               # combined state/HUC8 index and mask
+   # lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif'), pad))    # ecoConnect layers
    # saved <<- list(shindex = shindex, lays = lays); return()                ############ TEMP TO SPEED UP TESTING
    
    shindex <- saved$shindex
    lays <- saved$lays
-   
+   gridsize <- dim(shindex)[1:2] - pad * 2                                                      # unpadded grid size
    
    
    # create results
    statehuc <- data.frame(matrix(NA, n, 2))
    names(statehuc) <- c('state', 'huc')            # state and HUC8 for each sample
- #  z <- array(NA, dim = c(n, length(idx$w), length(layers), 2))                                 # row x acres x systems x all/best
-   z <- array(NA, dim = c(n, length(acres), length(layers), 2))                                 # row x acres x systems x all/best
+   z <- array(NA, dim = c(n, length(idx$w), length(layers), 2))                                 # row x acres x systems x all/best
+   #z <- array(NA, dim = c(n, length(acres), length(layers), 2))                                 # row x acres x systems x all/best
    cat('Gathering ', format(n, scientific = FALSE, big.mark = ','), ' samples...\n', sep = '')
    
    # gather samples
    for(i in 1:n) {                                                                              # For each sample,
       success <- FALSE
       while(!success) {                                                                         #    until we find a live one,
-         s <- round(runif(2) * dim(shindex)[1:2])                                               #    index of sample
-         if(!is.na(index.block(shindex, s, 0))) {                                               #    if focal cell has data,
+         s <- round(runif(2) * gridsize)                                                        #    index of sample
+         if(!is.na(index.block(shindex, s, pad))) {                                             #    if focal cell has data,
             sh <- index.block(shindex, s, idx$block.idx)                                        #       read shindex for block
             if(any(!is.na(sh))) {                                                               #       If there are any data, continue
                got.layers <- FALSE
@@ -184,7 +185,7 @@
                else {
                   shu <- unpack(sh)
                   statehuc[i, ] <- c(fmode(shu$state, na.rm = TRUE), fmode(shu$huc, na.rm = TRUE))
-               }
+               } 
                
                if(i %% skip == 0)                                                               #       update progress bar every nth iteration
                   pb()
@@ -192,7 +193,7 @@
          }
       }
       if(i >= idx$next.drop)                                                                    #    if it's time to drop samples,
-         if(is.null(idx <- set.up.indices(idx, n, n.factor, i + 1)))                            #       drop 'em
+         if(is.null(idx <- set.up.indices(idx, n, n.factor, i + 1, pad)))                       #       drop 'em
             break
    }
    
@@ -220,14 +221,14 @@
    print(call.args)
    sink()
    
-   z<<-z
-   ss <- rep(NA, length(acres))
-   for(j in 1:length(acres)) 
-      ss[j] <- sum(!is.na(z[, j, 1, 1]))
-   names(ss) <- acres
-   cat('\nSample sizes:\n')
-   print(ss)
-   cat('\n')
+   # z<<-z
+   # ss <- rep(NA, length(acres))
+   # for(j in 1:length(acres)) 
+   #    ss[j] <- sum(!is.na(z[, j, 1, 1]))
+   # names(ss) <- acres
+   # cat('\nSample sizes:\n')
+   # print(ss)
+   # cat('\n')
    
    
    cat('Results written to ', f, '. To finish off, run\n\n', sep = '')
