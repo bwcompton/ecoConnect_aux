@@ -47,7 +47,7 @@
    sinfo <- read.table(paste0(sourcepath, 'stateinfo.txt'), sep = '\t', header = TRUE)          # we'll use these for sample size tables
    hinfo <- read.table(paste0(sourcepath, 'hucinfo.txt'), sep = '\t', header = TRUE)
    
-   files <- list.files('c:/gis/lcc/ecoConnect_final/', paste0('ec_samples_', postfix, '.*\\.RDS$'))
+   files <- list.files(sourcepath, paste0('ec_samples_', postfix, '.*\\.RDS$'))
    cat('Found ', length(files), ' sample files\n', sep = '')
    
    for(i in 1:length(files)) {
