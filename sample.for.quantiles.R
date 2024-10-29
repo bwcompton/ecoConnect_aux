@@ -138,12 +138,12 @@
    
    
    # read source data
-   # shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
-   # lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
-   # saved <<- list(shindex = shindex, lays = lays); return()                ############ TEMP TO SPEED UP TESTING
+   shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
+   lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
    
-   shindex <- saved$shindex
-   lays <- saved$lays
+   # saved <<- list(shindex = shindex, lays = lays); return()      # TEMP TO SPEED UP TESTING
+   # shindex <- saved$shindex
+   # lays <- saved$lays
    
    
    
