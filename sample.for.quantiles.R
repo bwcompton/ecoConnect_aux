@@ -155,13 +155,14 @@
    statehuc <- data.frame(matrix(NA, n, 2))
    names(statehuc) <- c('state', 'huc')            # state and HUC8 for each sample
    z <- array(NA, dim = c(n, length(acres), length(layers), 2))                                 # row x acres x systems x all/best
+   size <- dim(shindex)[1:2] - 1
    cat('Gathering ', format(n, scientific = FALSE, big.mark = ','), ' samples...\n', sep = '')
    
    # gather samples
    for(i in 1:n) {                                                                              # For each sample,
       success <- FALSE
       while(!success) {                                                                         #    until we find a live one,
-         s <- round(runif(2) * dim(shindex)[1:2])                                               #    index of sample
+         s <- round(runif(2) * size + 1)                                                        #    index of sample
          if(!is.na(index.block(shindex, s, 0))) {                                               #    if focal cell has data,
             sh <- index.block(shindex, s, idx$block.idx)                                        #       read shindex for block
             if(any(!is.na(sh))) {                                                               #       If there are any data, continue
