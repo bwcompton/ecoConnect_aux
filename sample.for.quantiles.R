@@ -91,13 +91,13 @@
    'index.block' <- function(x, s, indices = 0) {                                               # Index block of a matrix allowing indices beyond edges
       i <- list(s[1] + indices, s[2] + indices)                                                 #    row and column indices
       
-      if(any(i[[1]] < 1))                                                                       #    a rather ugly series of out of bounds checks, intended to be fast
+    #  if(any(i[[1]] < 1))                                                                       #    a rather ugly series of out of bounds checks, intended to be fast
          i[[1]][i[[1]] < 1] <- NA
-      if(any(i[[2]] < 1))
+    #  if(any(i[[2]] < 1))
          i[[2]][i[[2]] < 1] <- NA
-      if(any(i[[1]] > dim(x)[1]))
+    #  if(any(i[[1]] > dim(x)[1]))
          i[[1]][i[[1]] > dim(x)[1]] <- NA
-      if(any(i[[2]] > dim(x)[2]))
+    #  if(any(i[[2]] > dim(x)[2]))
          i[[2]][i[[2]] > dim(x)[2]] <- NA
       
       x[i[[1]], i[[2]]]
