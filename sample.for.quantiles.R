@@ -3,7 +3,7 @@
                                    server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
                                    sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
                                    # sourcepath = 'c:/gis/lcc/ecoConnect_final/', postfix = '', 
-                                   threshold = 0.25, testing.all = TRUE) {
+                                   threshold = 0.25) {
    
    
    # Calculate percentiles of simulated parcels of ecoConnect layers and save files for ecoConnect.tool
@@ -186,20 +186,13 @@
                   }
                }
                
-               if(testing.all) {
-                if(all(sh == sh[1], na.rm = TRUE))                                               #       get most common state and HUC ids    ##### temp version with a switch for speed tests
-               # if((max(sh, na.rm = TRUE) - min(sh, na.rm = TRUE)) < 1)
-                       statehuc[i, ] <- unpack(sh[1])
-                  else {
-                     shu <- unpack(sh)
-                     statehuc[i, ] <- c(fmode(shu$state, na.rm = TRUE), fmode(shu$huc, na.rm = TRUE))
-                  }
-               }
-               else
-               {
+               if((max(sh, na.rm = TRUE) - min(sh, na.rm = TRUE)) < 1)                          #       get most common state and HUC ids
+                  statehuc[i, ] <- unpack(sh[1])
+               else {
                   shu <- unpack(sh)
                   statehuc[i, ] <- c(fmode(shu$state, na.rm = TRUE), fmode(shu$huc, na.rm = TRUE))
                }
+               
                
                if(i %% skip == 0)                                                               #       update progress bar every nth iteration
                   pb()
