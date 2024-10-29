@@ -187,8 +187,8 @@
                }
                
                if(testing.all) {
-                #  if(all(sh == sh[1], na.rm = TRUE))                                               #       get most common state and HUC ids    ##### temp version with a switch for speed tests
-                if((max(sh, na.rm = TRUE) - min(sh, na.rm = TRUE)) < 1)
+                if(all(sh == sh[1], na.rm = TRUE))                                               #       get most common state and HUC ids    ##### temp version with a switch for speed tests
+               # if((max(sh, na.rm = TRUE) - min(sh, na.rm = TRUE)) < 1)
                        statehuc[i, ] <- unpack(sh[1])
                   else {
                      shu <- unpack(sh)
