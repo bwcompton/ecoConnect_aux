@@ -91,14 +91,10 @@
    'index.block' <- function(x, s, indices = 0) {                                               # Index block of a matrix allowing indices beyond edges
       i <- list(s[1] + indices, s[2] + indices)                                                 #    row and column indices
       
-    #  if(any(i[[1]] < 1))                                                                       #    a rather ugly series of out of bounds checks, intended to be fast
-         i[[1]][i[[1]] < 1] <- NA
-    #  if(any(i[[2]] < 1))
-         i[[2]][i[[2]] < 1] <- NA
-    #  if(any(i[[1]] > dim(x)[1]))
-         i[[1]][i[[1]] > dim(x)[1]] <- NA
-    #  if(any(i[[2]] > dim(x)[2]))
-         i[[2]][i[[2]] > dim(x)[2]] <- NA
+      i[[1]][i[[1]] < 1] <- NA                                                                  #    clean up out-of-bounds subscripts
+      i[[2]][i[[2]] < 1] <- NA
+      i[[1]][i[[1]] > dim(x)[1]] <- NA
+      i[[2]][i[[2]] > dim(x)[2]] <- NA
       
       x[i[[1]], i[[2]]]
    }
@@ -228,7 +224,6 @@
    print(call.args)
    sink()
    
-   z<<-z ##################### temp for testing
    
    ss <- rep(NA, length(acres))                                                                 # print sample sizes
    for(j in 1:length(acres)) 
