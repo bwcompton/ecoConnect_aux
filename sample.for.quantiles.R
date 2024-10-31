@@ -20,6 +20,7 @@
    #   sourcepath          path for source TIFFs
    #   postfix             add to the end of result filenames
    #   threshold           maximum proportion of missing cells to be counted as a good sample
+   #   repeat.forever      if TRUE, just keep cranking them out until stopped
    #   
    # Source data (in sourcepath):
    #   shindex.tif         index grid for states and HUC8s, with nodata for all cells that should be masked out (marine, estaurine, freshwater tidal)

@@ -11,4 +11,4 @@ m <- 7                            # this is how many minutes it takes to read da
 Sys.sleep(60 * m * i)            # sleep to give other runs a chance to load data. Set i to iteration number
 
 
-sample.for.quantiles(postfix = 'new')   # repeats forever in ~2 hour increments
+sample.for.quantiles(postfix = 'new')   # repeats forever in ~1 hour increments
