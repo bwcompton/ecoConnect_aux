@@ -136,7 +136,7 @@
       if((loop <- loop + 1) > 1 & !repeat.forever)
          break
    cat('Loop ', loop, ' of ', n, ' samples', 
-       ifelse(repeat.forever, '(repeating forever)', ''), '...\n', sep = '')
+       ifelse(repeat.forever, ' (repeating forever)', ''), '...\n', sep = '')
    
    # come up with indices for each specified acreage 
    cells.per.acre <- 4.496507136                                                                # 1 acre = 4.5 cells
