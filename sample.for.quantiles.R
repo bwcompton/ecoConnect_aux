@@ -1,9 +1,9 @@
-'sample.for.quantiles' <- function(n = 1e8, n.factor = c(1, 1, 1, 1, 1e2, 1e3, 1e4), acres  = c(1, 10, 100, 1000, 1e4, 1e5, 1e6), 
+'sample.for.quantiles' <- function(n = 5e5, n.factor = c(1, 1, 1, 1, 1e2, 1e3, 1e4), acres  = c(1, 10, 100, 1000, 1e4, 1e5, 1e6), 
                                    best.pct = 0.5, layers = c('forests', 'ridgetops', 'wetlands', 'floodplains' ), 
                                    server.names = c('Forest_fowet', 'Ridgetop', 'Nonfo_wet', 'LR_floodplain_forest'),
                                    sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix = '', 
                                    # sourcepath = 'c:/gis/lcc/ecoConnect_final/', postfix = '', 
-                                   threshold = 0.25) {
+                                   threshold = 0.25, repeat.forever = TRUE) {
    
    
    # Calculate percentiles of simulated parcels of ecoConnect layers and save files for ecoConnect.tool
@@ -121,6 +121,21 @@
       list(state = as.vector(floor(x / 1000)), huc = as.vector(x - floor(x / 1000) * 1000))
    
    
+
+   # read source data
+   shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
+   lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
+   
+   # saved <<- list(shindex = shindex, lays = lays); return()      # TEMP TO SPEED UP TESTING
+   # shindex <- saved$shindex
+   # lays <- saved$lays
+   loop <- 0
+   
+   repeat {
+      if((loop <- loop + 1) > 1 & !repeat.forever)
+         break
+   cat('Loop ', loop, ' of ', n, 'samples...', 
+       ifelse(repeat.forever, '(repeating forever)', ''), '\n', sep = '')
    
    # come up with indices for each specified acreage 
    cells.per.acre <- 4.496507136                                                                # 1 acre = 4.5 cells
@@ -136,15 +151,7 @@
    
    idx <- set.up.indices(idx, n, n.factor)                                                      # set up indices; to be amended when we drop block sizes based on n.factor                                                                 
    
-   
-   # read source data
-   shindex <- read.tiff(paste0(sourcepath, 'shindex.tif'))                                      # combined state/HUC8 index and mask
-   lays <- lapply(layers, function(x) read.tiff(paste0(sourcepath, 'ecoConnect_', x, '.tif')))  # ecoConnect layers
-   
-   # saved <<- list(shindex = shindex, lays = lays); return()      # TEMP TO SPEED UP TESTING
-   # shindex <- saved$shindex
-   # lays <- saved$lays
-   
+  
    
    
    # create results
@@ -238,4 +245,5 @@
    cat('   get.quantiles(\'', sourcepath, '\', \'', postfix, '\')\n\n', sep = '')
    cat('This will gather samples from all sample files in ', sourcepath, '*', postfix, '.RDS\n', sep = '')
    cat('Total time taken: ', elapsed, '\n', sep = '')
+   }
 }
