@@ -65,7 +65,7 @@
          z <- abind(z, x$samples, along = 1)
          statehuc <- rbind(statehuc, x$statehuc)
       }
-      cat('Total samples: ', format(dim(z)[1], big.mark = ','), '\n', sep = '')
+      cat('Total samples: ', format(dim(z)[1], big.mark = ','), ' (', i, ' of ', length(files), ' files)\n', sep = '')
    }
    
    
