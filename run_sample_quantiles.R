@@ -5,8 +5,10 @@
 
 
 source('X:/LCC/Code/ecoConnect_aux/sample.for.quantiles.R')
+source('X:/LCC/Code/ecoConnect_aux/get.quantiles.R')
 
-i <- 2
+
+i <- 3
 m <- 7                            # this is how many minutes it takes to read data
 Sys.sleep(60 * m * i)            # sleep to give other runs a chance to load data. Set i to iteration number
 

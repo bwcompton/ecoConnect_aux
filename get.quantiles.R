@@ -1,9 +1,9 @@
-'get.quantiles' <- function(sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/', postfix) {
+'get.quantiles' <- function(postfix, sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/') {
    
    # Process samples from one or more sample.for.quantiles runs
    # Arguments:
+   #     postfix         postfix of sample files
    #     sourcepath     path to sample files from sample.for.quantiles
-   #     posfix         postfix of sample files
    #  
    # Reads:
    #     stateinfo.txt  table of state classes and state names
@@ -65,7 +65,7 @@
          z <- abind(z, x$samples, along = 1)
          statehuc <- rbind(statehuc, x$statehuc)
       }
-      cat('Total samples: ', dim(z)[1], '\n', sep = '')
+      cat('Total samples: ', format(dim(z)[1], big.mark = ','), '\n', sep = '')
    }
    
    
