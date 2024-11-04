@@ -57,7 +57,7 @@
    
    if(!is.null(maxfiles)) {
       files <- files[1:min(maxfiles, length(files))]
-      cat('Using first ', length(files), 'files\n')
+      cat('Using first ', length(files), 'files\n', sep = '')
    }
       
    
