@@ -55,7 +55,13 @@
    files <- list.files(sourcepath, paste0('ec_samples_', postfix, '.*\\.RDS$'))
    cat('Found ', length(files), ' sample files\n', sep = '')
    
-   for(i in 1:max(length(files), maxfiles, na.rm = TRUE)) {
+   if(!is.null(maxfiles)) {
+      files <- files[1:min(maxfiles, length(files))]
+      cat('Using first ', length(files), 'files\n')
+   }
+      
+   
+   for(i in 1:length(files)) {
       cat(paste0('Reading ',sourcepath, files[i], '...\n'))
       x <- readRDS(paste0(sourcepath, files[i]))
       if(i == 1) {

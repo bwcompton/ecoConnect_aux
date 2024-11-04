@@ -16,3 +16,4 @@ Sys.sleep(60 * m * i)            # sleep to give other runs a chance to load dat
 sample.for.quantiles(postfix = 'new')   # repeats forever in ~1 hour increments
 
 # sample.for.quantiles(postfix = 'try25', best.pct = 0.25)   # repeats forever in ~1 hour increments
+# get.quantiles(postfix = 'try25', maxfiles = 30)
