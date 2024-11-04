@@ -34,6 +34,9 @@
    #     
    #  realized.acres (printed to console)
    #     a conversion from nominal acres to actual acerage of pseudoparcels. Use this in make.report.percentiles when interpolating percentiles for a given parcel.
+   #     
+   # Note: this is a true memory hog, so run it on an idle machine. The chain of rbinds is ugly, thus slow. You can only run for about 100 x 1e5 sample files in 128 GB!
+   # 
    # B. Compton, 18 Oct 2024: split into sample.for.quantiles and get.quantiles from ecoConnect.quantiles
    
    
