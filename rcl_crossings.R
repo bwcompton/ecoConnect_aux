@@ -13,12 +13,13 @@
    
    
    x <- read.table(source, sep = '\t', header = TRUE)
-   cat('Source has ', dim(x)[1], ' cases\n')
+   cat('Source has ', prettyNum(dim(x)[1], big.mark = ','), ' cases\n', sep = '')
    
  #  x <- x[x$d8accum >= flow & x$ADT >= traffic, ]
    x <- x[x$bridgeprob >= bridgeprob & x$ADT >= traffic, ]
+   cat('Result has ', prettyNum(dim(x)[1], big.mark = ','), ' cases\n', sep = '')
+   
    f <- paste0(dirname(source), '/rcl_', basename(source))
    write.table(x, f, row.names = FALSE)
-   
-   cat('Result has ', dim(x)[1], 'cases; written to ', f, '\n')
+   cat('Written to ', f, '\n', sep = '')
 }
