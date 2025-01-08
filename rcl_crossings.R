@@ -20,6 +20,6 @@
    cat('Result has ', prettyNum(dim(x)[1], big.mark = ','), ' cases\n', sep = '')
    
    f <- paste0(dirname(source), '/rcl_', basename(source))
-   write.table(x, f, row.names = FALSE)
+   write.table(x, f, sep = '\t', row.names = FALSE, quote = FALSE)
    cat('Written to ', f, '\n', sep = '')
 }
