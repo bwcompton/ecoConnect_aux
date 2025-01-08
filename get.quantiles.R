@@ -1,8 +1,9 @@
-'get.quantiles' <- function(postfix, sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/') {
+'get.quantiles' <- function(postfix, maxfiles = NULL, sourcepath = 'x:/LCC/GIS/Final/ecoRefugia/ecoConnect_final/') {
    
    # Process samples from one or more sample.for.quantiles runs
    # Arguments:
-   #     postfix         postfix of sample files
+   #     postfix        postfix of sample files
+   #     maxfiles       the maximum number of files to sample
    #     sourcepath     path to sample files from sample.for.quantiles
    #  
    # Reads:
@@ -53,6 +54,12 @@
    
    files <- list.files(sourcepath, paste0('ec_samples_', postfix, '.*\\.RDS$'))
    cat('Found ', length(files), ' sample files\n', sep = '')
+   
+   if(!is.null(maxfiles)) {
+      files <- files[1:min(maxfiles, length(files))]
+      cat('Using first ', length(files), 'files\n', sep = '')
+   }
+      
    
    for(i in 1:length(files)) {
       cat(paste0('Reading ',sourcepath, files[i], '...\n'))
