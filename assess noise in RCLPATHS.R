@@ -4,9 +4,12 @@
 
 
 
-x <- read.table('x:/LCC/GIS/Final/ecoRefugia/fo_fowet/tables/rcl_edges.txt', sep = '\t', header = TRUE)
-e <- read.table('x:/LCC/GIS/Final/ecoRefugia/fo_fowet/tables/edges.txt', sep = '\t', header = TRUE)
+# x <- read.table('x:/LCC/GIS/Final/ecoRefugia/fo_fowet/tables/rcl_edges.txt', sep = '\t', header = TRUE)
+# e <- read.table('x:/LCC/GIS/Final/ecoRefugia/fo_fowet/tables/edges.txt', sep = '\t', header = TRUE)
 
+
+x <- read.table('x:/LCC/GIS/Final/ecoRefugia/rcl_fo_fowet/tables/rcl_edges.txt', sep = '\t', header = TRUE)
+e <- read.table('x:/LCC/GIS/Final/ecoRefugia/rcl_fo_fowet/tables/edges.txt', sep = '\t', header = TRUE)
 
 
 y <- merge(x, e, by = c('from', 'to'))
