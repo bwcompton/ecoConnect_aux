@@ -1,6 +1,16 @@
-# R code for graph processing and various post-processing and packaging for ecoConnect 
+# R and APL code for graph processing and various post-processing and packaging for ecoConnect 
 
-## Pass 2 of ECOCONNECT, called by ECOGRAPH
+Note: Passes 1 and 3 are APL code, in APL/*.apl. All other code is in R.
+
+## Top-level call and all passes for ecoConnect (APL)
+
+	ECOCONNECT (top-level function, with info on passes and parameters in comments)
+		ECONODES (pass 0)
+		ECOPATHS (pass 1)
+		ECOGRAPH (pass 2)
+		ECOPATHS (again, pass 3)
+
+## Pass 2 of ECOCONNECT, (in R, called by APL function ECOGRAPH)
 
 	call.eco.graph.R
 		eco.graph.R
