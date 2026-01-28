@@ -1,0 +1,3 @@
+RESET
+
+⎕INBUF ')RESET',⎕TCNL
