@@ -1,6 +1,6 @@
 # R and APL code for graph processing and various post-processing and packaging for ecoConnect 
 
-Note: Passes 1 and 3 are APL code, in APL/*.apl. All other code is in R.
+Top-level calls and code for passes 0, 1, and 3 are in APL (in APL/*.apl). All other code is in R.
 
 ## Top-level call and all passes for ecoConnect (APL)
 
